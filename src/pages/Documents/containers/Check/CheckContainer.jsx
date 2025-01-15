@@ -25,7 +25,6 @@ const DocsLabels = {
     name: 'Счет на оплату',
     fields: [
       { nameId: 'bank',  id: 1276619, typeValue: 'select',  name: 'Банк' },
-      
     ],
     typeDocs: 'check',
     createDocs: DocsAPI.createCheck,
