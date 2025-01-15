@@ -1,4 +1,4 @@
-const banks = [
+export const banks = [
     {
       id: 1,
       name: 'Сбербанк',

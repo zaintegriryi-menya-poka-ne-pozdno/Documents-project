@@ -18,6 +18,8 @@ import CustomFields from '../CustomFields/CustomFields';
 import FilesContainer from '../FilesContainer/FilesContainer';
 import CustomButton from '../../../../components/CustomButton/CustomButton';
 
+import {banks} from '../banks';
+
 const DocsLabels = {
   check: {
     name: 'Счет на оплату',
@@ -53,6 +55,7 @@ const CheckContainer = ({ type }) => {
   const [fieldValues, setFieldValues] = useState({});
   const [dataDocs, setDataDocs] = useState(null);
   const { name, fields } = DocsLabels[type];
+  const [documents, setDocuments] = useState([])
 
   const [summTotal, setSummTotal] = useState(0);
 
@@ -148,9 +151,20 @@ const CheckContainer = ({ type }) => {
     }
   };
 
+  const loadDocuments = () => {
+    const inputElement = document.querySelector(`input[name="CFV[1276965]"]`);
+    if (inputElement) {
+      const savedData = inputElement.value;
+      setDocuments(savedData ? JSON.parse(savedData) : []);
+    } else {
+      setDocuments([]);
+    }
+  }
+
   useEffect(() => {
     fetchDataInfo();
     loadTableData();
+    loadDocuments();
 
     const observer1 = new MutationObserver((mutationsList, observer) => {
       for (let mutation of mutationsList) {
@@ -207,27 +221,89 @@ const CheckContainer = ({ type }) => {
   }, [fieldValues, entities]);
 // Генерация тела json для запроса
   const handleGenerateCheck = async () => {
+    const lead = document.querySelector('#lead_main_user-users_select_holder')
+    const lead_name = lead.querySelector('span').textContent
+    const managers = window.AMOCRM.constant("managers")
+    const matchedManager = Object.values(managers).find(manager => manager.title === lead_name)
+
+    const lead_id = document.querySelector('#add_tags')
+    const id = Number(lead_id.querySelector('span').textContent.slice(1))
+
+    const invoice = document.querySelector('#person_n').textContent
+
+    const selected_bank = banks.find(bank => bank.name === fieldValues.bank.trim())
+
+    const services = tableData.map((item, index) => {
+      return {
+        number: (index + 1).toString(),
+        accomodation: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        price: item.price
+      }
+    })
+
+    const client = document.querySelector('input[name="CFV[1276573]"]')
+
+    const rawValue = client.value;
+    const parsedValue = JSON.parse(rawValue);
+
     const requestBody = {
-      entities,
-      fields: fieldValues,
-      tableData,
-      summTotal
+      doc_type: "bill",
+      filename: "Счёт_на_оплату_для.docx",
+      amo_id: id,
+      phone: matchedManager.phone,
+      mail: matchedManager.login,
+      invoice_number: invoice,
+      bank_adress: selected_bank.bank_adress,
+      biq: selected_bank.biq,
+      korr_bill: selected_bank.korr_bill,
+      raschetny_bill: selected_bank.raschetny_bill,
+      customer: parsedValue.name,
+      inn: parsedValue.inn,
+      kpp: parsedValue.kpp,
+      postal_code: parsedValue.postalСode,
+      city: parsedValue.city,
+      street: parsedValue.street,
+      building: parsedValue.building,
+      office: parsedValue.office,
+      services,
     };
 
-    console.log(JSON.stringify(requestBody, null, 2));
+    //console.log(JSON.stringify(requestBody, null, 2))
 
     setIsLoading(true);
 
-    if (allFieldsFilled) {
-      const postData = async () => {
-        const postDataDocs = DocsLabels[type].createDocs;
-        await postDataDocs(requestBody);
-        await fetchDataInfo();
+    try {
+      const response = await fetch('https://24virteg.ru/api/generate-docx/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      await postData();
+
+      const responseData = await response.json();
+
+      await setDocuments(prev => Array.isArray(prev)
+          ? [...prev, `https://24virteg.ru/api/get-docx/?document_id=${responseData.document_id}&amo_id=${responseData.amo_id}`]
+          : [`https://24virteg.ru/api/get-docx/?document_id=${responseData.document_id}&amo_id=${responseData.amo_id}`]
+      );
+
+    } catch (error) {
+      console.error("Error:", error.message);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
+
+  useEffect(() => {
+    handleUpdateDocuments();
+  }, [documents]);
 
   const handleAddRow = () => {
     setTableData([...tableData, { name: '', quantity: '', unit: '', price: '', total: '' }]);
@@ -244,6 +320,13 @@ const CheckContainer = ({ type }) => {
       updateInputValue('1276507', JSON.stringify(tableData));
     }
   };
+
+  const handleUpdateDocuments = () => {
+    const inputElement = document.querySelector(`input[name="CFV[1276965]"]`)
+    if (inputElement) {
+      updateInputValue('1276965', JSON.stringify(documents || []));
+    }
+  }
 
   const handleTableChange = (index, field, value) => {
     const newData = [...tableData];
@@ -273,7 +356,7 @@ const CheckContainer = ({ type }) => {
           style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}
           className={DocsLabels[type].files}
         >
-          <FilesContainer dataDocs={dataDocs} />
+          <FilesContainer dataDocs={documents} />
         </Container>
 
         <CustomButton
