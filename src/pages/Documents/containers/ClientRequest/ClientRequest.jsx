@@ -130,24 +130,22 @@ const ClientRequestContainer = ({ type }) => {
       return current.timestamp > latest.timestamp ? current : latest;
     }, dataInfoDocs.docs[0]);
 
-    if (latestDoc) {
-      const { dogovor_date, doroga, price, preprice, times_ways_to_pay } = latestDoc;
+    const latestName = latestDoc ? latestDoc.name : undefined;
 
-      setFieldValues({
-        dogovor_date: dogovor_date || '',
-        doroga: doroga || '',
-        price: price || '',
-        preprice: preprice || '',
-        times_ways_to_pay: times_ways_to_pay || ''
-      });
-
-      updateInputValue('1277055', dogovor_date || '');
-      updateInputValue('1277047', doroga || '');
-      updateInputValue('1277049', price || '');
-      updateInputValue('1277051', preprice || '');
-      updateInputValue('1277053', times_ways_to_pay || '');
+    if (latestName !== undefined) {
+      const updateInputValue = (name, newValue) => {
+        const element = document.querySelector(`[data-id="${name}"]`);
+        if (element) {
+          const input = element.querySelector('input');
+          if (input) {
+            input.value = newValue;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        }
+      };
+      updateInputValue('1447475', latestName);
     }
-  };
+  }
 
   const loadServices_1 = () => {
     const inputElement = document.querySelector(`input[name="CFV[1276961]"]`);
@@ -430,7 +428,7 @@ const ClientRequestContainer = ({ type }) => {
               style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}
               className={DocsLabels[type].files}
           >
-            <FilesContainer dataDocs={documents} />
+            <FilesContainer dataDocs={documents} name={'Заявка_по_договору_с_клиентом_для.docx'} />
           </Container>
 
           <CustomButton

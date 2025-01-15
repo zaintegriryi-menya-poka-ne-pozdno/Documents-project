@@ -355,7 +355,7 @@ const CheckContainer = ({ type }) => {
           style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}
           className={DocsLabels[type].files}
         >
-          <FilesContainer dataDocs={documents} />
+          <FilesContainer dataDocs={documents} name={'Счёт_на_оплату_для.docx'} />
         </Container>
 
         <CustomButton

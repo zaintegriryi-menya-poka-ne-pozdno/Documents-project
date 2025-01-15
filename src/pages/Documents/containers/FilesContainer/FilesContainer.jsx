@@ -17,7 +17,7 @@ import {
 // components
 
 
-const FilesContainer = ({dataDocs}) => {
+const FilesContainer = ({dataDocs, name}) => {
     if (!Array.isArray(dataDocs)) {
         return <p style={{ marginTop: '5px' }}>Документы отсутствуют</p>;
     }
@@ -28,7 +28,7 @@ const FilesContainer = ({dataDocs}) => {
                 <div>
                     {dataDocs.map(doc => (
                         <p key={doc} style={{ marginTop: '5px' }}>
-                            <a href={doc}>Счёт_на_оплату_для.docx</a>
+                            <a href={doc}>{name}</a>
                         </p>
                     ))}
                 </div>
