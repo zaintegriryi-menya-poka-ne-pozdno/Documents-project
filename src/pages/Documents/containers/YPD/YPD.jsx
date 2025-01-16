@@ -24,27 +24,14 @@ const DocsLabels = {
   ypd: {
     name: 'УПД',
     fields: [
-      { nameId: 'tip_dostavki',   id: 133147, typeValue: 'select',    name: 'Тип доставки' }, 
-      { nameId: 'vid_transporta', id: 133151, typeValue: 'select',    name: 'Вид транспорта' },
-      { nameId: 'vid_oplati',     id: 133373, typeValue: 'select',    name: 'Форма оплаты' }, 
-      { nameId: 'gde_oplata',     id: 179095, typeValue: 'select',    name: 'Оплата в' }, // форма оплаты
-      
-      { nameId: 'dostavka_do',    id: 133153, typeValue: 'select',    name: 'Адрес/дверь' },
-
-      { nameId: 'otkuda',         id: 179029, typeValue: 'select',    name: 'Откуда' },
-      { nameId: 'otkuda_tochno',  id: 1275901, typeValue: 'textarea',  name: 'Откуда точно' },
-      
-      { nameId: 'kuda',           id: 179035, typeValue: 'select',    name: 'Куда' },
-      { nameId: 'kuda_tochno',    id: 179037, typeValue: 'textarea',  name: 'Куда точно' },
-
-      { nameId: 'adress_dostavki',id: 1586685, typeValue: 'text',      name: 'Адрес доставки' },
-
-      { nameId: 'harakter_gruza', id: 1584461, typeValue: 'select',    name: 'Характер груза' },
-      { nameId: 'vid_upakovki',   id: 179501, typeValue: 'textarea',  name: 'Вид упаковки' },
-      { nameId: 'kolvo_mest',     id: 179505, typeValue: 'number',    name: 'Кол-во мест' }, // максимум 28 может быть число (от 1 до 28)
-    
-      { nameId: 'ves_gruza',      id: 133421, typeValue: 'number',    name: 'Вес груза' },
-      { nameId: 'obem_gruza',     id: 133433, typeValue: 'number',    name: 'Объём  груза' },
+      { nameId: 'bill',   id: 1277141, typeValue: 'text',    name: 'Статус' },
+      { nameId: 'document_type',   id: 1277143, typeValue: 'text',    name: 'Тип документа' },
+      { nameId: 'valyuta',   id: 1277145, typeValue: 'text',    name: 'Валюта (наименование, код)' },
+      { nameId: 'number',   id: 1277147, typeValue: 'text',    name: '№П/П' },
+      { nameId: 'tovar_name',   id: 1277149, typeValue: 'text',    name: 'Название товара' },
+      { nameId: 'price_without_tax',   id: 1277151, typeValue: 'text',    name: 'Стоимость товара' },
+      { nameId: 'axiz',   id: 1277153, typeValue: 'text',    name: 'Акцизы' },
+      { nameId: 'percent',   id: 1277155, typeValue: 'text',    name: 'Налоговая ставка' },
     ],
     typeDocs: 'ypd',
     createDocs: DocsAPI.createYPD,
@@ -52,39 +39,47 @@ const DocsLabels = {
   }
 };
 
-const customFields = [
-  { name: 'Отправитель',  entity: 'sender'    },
-  { name: 'Получатель',   entity: 'recipient' },
-  { name: 'Плательщик',   entity: 'payer'     }
-];
+const updateInputValue = (name, newValue) => {
+  const element = document.querySelector(`[data-id="${name}"]`);
+  if (element) {
+    const input = element.querySelector('input');
+    if (input) {
+      input.value = newValue;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+};
 
+const customFields = [
+  { name: 'Клиент',  entity: 'company'    },
+  { name: 'Водитель',   entity: 'contact' }
+];
 
 const YPDContainer = ({ type }) => {
   const [allFieldsFilled, setAllFieldsFilled] = useState(false);
   const [fieldValues, setFieldValues] = useState({});
   const [dataDocs, setDataDocs] = useState(null);
   const { name, fields } = DocsLabels[type];
+  const [documents, setDocuments] = useState([])
 
   const [summTotal, setSummTotal] = useState(0);
 
   const [isLoading, setIsLoading] = useState(false); // новое состояние
 
   const [entities, setEntities] = useState({
-    sender: {},
-    recipient: {},
-    payer: {},
+    contact: {},
+    company: {},
   });
 
   const extractEntities = () => {
     const newEntities = {
-      sender: {},
-      recipient: {},
-      payer: {},
+      contact: {},
+      company: {},
     };
 
-    document.querySelectorAll('.entity__sender, .entity__recipient, .entity__payer').forEach(entity => {
-      const entityClass = entity.classList.contains('entity__sender') ? 'sender' :
-        entity.classList.contains('entity__recipient') ? 'recipient' : 'payer';
+    document.querySelectorAll('.entity__company, .entity__contact').forEach(entity => {
+      const entityClass = entity.classList.contains('entity__contact') ? 'contact' :
+          entity.classList.contains('entity__company') ? 'company' : '';
 
       entity.querySelectorAll('[class*="entity__key__"]').forEach(item => {
         const key = item.className.split(' ').find(cls => cls.startsWith('entity__key__')).replace('entity__key__', '').toLowerCase();
@@ -98,10 +93,10 @@ const YPDContainer = ({ type }) => {
 
   const checkAllFieldsFilled = (newEntities) => {
     const areCustomFieldsFilled = customFields.every(field => Object.keys(newEntities[field.entity]).length > 0);
-    
+
     let areFieldsFilled = false;
 
-    const contractListDocs = document.querySelector('.ypd_fields__container');
+    const contractListDocs = document.querySelector('.clientrequest_fields__container');
     if (contractListDocs) {
       const fieldElements = contractListDocs.querySelectorAll('[class*="field__biba_id_"]');
       areFieldsFilled = Array.from(fieldElements).every(field => {
@@ -130,28 +125,38 @@ const YPDContainer = ({ type }) => {
 
     const latestDoc = dataInfoDocs.docs.reduce((latest, current) => {
       return current.timestamp > latest.timestamp ? current : latest;
-    }, dataInfoDocs.docs[0]); // Добавим начальное значение для `reduce`, чтобы избежать ошибок, если массив пустой.
-    
+    }, dataInfoDocs.docs[0]);
+
     const latestName = latestDoc ? latestDoc.name : undefined;
 
     if (latestName !== undefined) {
-        const updateInputValue = (name, newValue) => {
-          const element = document.querySelector(`[data-id="${name}"]`);
-          if (element) {
-            const input = element.querySelector('input');
-            if (input) {
-              input.value = newValue;
-              input.dispatchEvent(new Event('input', { bubbles: true }));
-            }
+      const updateInputValue = (name, newValue) => {
+        const element = document.querySelector(`[data-id="${name}"]`);
+        if (element) {
+          const input = element.querySelector('input');
+          if (input) {
+            input.value = newValue;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
           }
-        };
-        updateInputValue('1447475', latestName);
+        }
+      };
+      updateInputValue('1447475', latestName);
+    }
+  }
+
+  const loadDocuments = () => {
+    const inputElement = document.querySelector(`input[name="CFV[1277135]"]`);
+    if (inputElement) {
+      const savedData = inputElement.value;
+      setDocuments(savedData ? JSON.parse(savedData) : []);
+    } else {
+      setDocuments([]);
     }
   }
 
   useEffect(() => {
-
-    fetchDataInfo();
+    fetchDataInfo()
+    loadDocuments()
 
     const observer1 = new MutationObserver((mutationsList, observer) => {
       for (let mutation of mutationsList) {
@@ -205,70 +210,85 @@ const YPDContainer = ({ type }) => {
   }, [fieldValues, entities]);
 
 
-  const handleGenerateYPD = async () => {
+  const handleGenerateYPD  = async () => {
+    const lead_id = document.querySelector('#add_tags')
+    const id = Number(lead_id.querySelector('span').textContent.slice(1))
 
-    let dataReal = null;
+    const invoice = document.querySelector('#person_n').textContent
 
-    const dateElement = document.querySelector(`input[name="CFV[133081]"]`);
-    if (dateElement) {
-      let value = dateElement.value;
-      if (!value) {
-        dataReal = 'ignore'; 
-      } else {
-        dataReal = value;
-      }
-    }
+    const client = document.querySelector('input[name="CFV[1276573]"]')
+    const rawValue = client.value;
+    const parsedValue = JSON.parse(rawValue);
 
-    let dataName = null;
-
-    const nameElement = document.querySelector(`input[name="CFV[1447475]"]`);
-    if (nameElement) {
-      let value = nameElement.value;
-      if (!value) {
-        dataName = 'ignore'; 
-      } else {
-        dataName = value;
-      }
-    }
-
-    let otherText = null;
-
-    const otherElement = document.querySelector(`input[name="CFV[1584463]"]`);
-    if (otherElement) {
-      let value = otherElement.value;
-      if (!value) {
-        otherText = 'ignore'; 
-      } else {
-        otherText = value;
-      }
-    }
-
-    setIsLoading(true); // установить состояние загрузки
-    const combinedData = {
-      entities,
-      fields: fieldValues,
-      summTotal: summTotal,
-      dataReal: dataReal,
-      otherText: otherText,
-      dataName: dataName
+    const requestBody = {
+      doc_type: "upd",
+      filename: "УПД_разраб_для.doc",
+      amo_id: id,
+      buyer_info: parsedValue.name,
+      buyer_adress: `${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}`,
+      buyer_inn: `${parsedValue.inn}/${parsedValue.kpp}`,
+      bill_number: invoice,
+      bill: fieldValues.bill,
+      document_type: fieldValues.document_type,
+      valyuta: fieldValues.valyuta,
+      number: fieldValues.number,
+      tovar_name: fieldValues.tovar_name,
+      price_without_tax: fieldValues.price_without_tax,
+      axiz: fieldValues.axiz,
+      percent: fieldValues.percent,
     };
-    console.log(combinedData);
-    
 
-    if (allFieldsFilled) {
-      const postData = async () => {
-        const postDataDocs = DocsLabels[type].createDocs;
-        await postDataDocs(combinedData);
-        await fetchDataInfo();
+    console.log(JSON.stringify(requestBody, null, 2))
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('https://24virteg.ru/api/generate-docx/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      await postData();
+
+      const responseData = await response.json();
+
+      await setDocuments(prev => Array.isArray(prev)
+          ? [...prev, `https://24virteg.ru/api/get-docx/?document_id=${responseData.document_id}&amo_id=${responseData.amo_id}`]
+          : [`https://24virteg.ru/api/get-docx/?document_id=${responseData.document_id}&amo_id=${responseData.amo_id}`]
+      );
+
+    } catch (error) {
+      console.error("Error:", error.message);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false); // установить состояние загрузки
   };
 
+  useEffect(() => {
+    handleUpdateDocuments();
+  }, [documents]);
 
+  const handleUpdateDocuments = () => {
+    const inputElement = document.querySelector(`input[name="CFV[1277135]"]`)
+    if (inputElement) {
+      updateInputValue('1277135', JSON.stringify(documents || []));
+    }
+  }
 
-
+  const getEntityName = (entityType) => {
+    const targetInputName = entityType === 'contact' ? 'CFV[1276575]' : 'CFV[1276573]';
+    const targetInput = document.querySelector(`input[name="${targetInputName}"]`);
+    if (targetInput && targetInput.value) {
+      const entityData = JSON.parse(targetInput.value);
+      return entityData.name || 'данные отсутствуют';
+    }
+    return 'данные отсутствуют';
+  };
 
   return (
     <Container>
@@ -282,7 +302,7 @@ const YPDContainer = ({ type }) => {
         style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}
         className={DocsLabels[type].files}
       >
-        <FilesContainer dataDocs={dataDocs} />
+        <FilesContainer dataDocs={documents} name={'УПД_разраб_для.docx'} />
       </Container>
 
       <CustomButton
@@ -300,31 +320,32 @@ const YPDContainer = ({ type }) => {
       />
 
       <Container style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}>
-        
-        <div style={{ marginTop: '5px', marginBottom: '5px' }}>
-        {customFields.map((field, index) => (
-          <ContainerHeader key={index} style={{ color: Object.keys(entities[field.entity]).length > 0 ? 'green' : 'red' }}>
-            <ContainerLeft style={{ flex: 4 }}>
-              {field.name}
-            </ContainerLeft>
-            <ContainerRight style={{ flex: 7, justifyContent: 'flex-start', paddingLeft: '8px' }}>
-              {Object.keys(entities[field.entity]).length > 0 ? entities[field.entity].name : 'данные отсутствуют'}
-            </ContainerRight>
-          </ContainerHeader>
-        ))}
+
+        <div style={{marginTop: '5px', marginBottom: '5px'}}>
+          {customFields.map((field, index) => (
+              <ContainerHeader key={index}
+                               style={{color: getEntityName(field.entity) !== 'данные отсутствуют' ? 'green' : 'red'}}>
+                <ContainerLeft style={{flex: 4}}>
+                  {field.name}
+                </ContainerLeft>
+                <ContainerRight style={{flex: 7, justifyContent: 'flex-start', paddingLeft: '8px'}}>
+                  {getEntityName(field.entity)}
+                </ContainerRight>
+              </ContainerHeader>
+          ))}
         </div>
-        
-        <div className="ypd_fields__container">
+
+        <div className="clientrequest_fields__container">
           {fields.map(field => (
-            <ContainerHeader key={field.id}>
-              <CustomFields
-                id={field.id}
-                type={field.typeValue}
-                name={field.name}
-                nameId={field.nameId}
-                onFieldChange={handleFieldChange}
-              />
-            </ContainerHeader>
+              <ContainerHeader key={field.id}>
+                <CustomFields
+                    id={field.id}
+                    type={field.typeValue}
+                    name={field.name}
+                    nameId={field.nameId}
+                    onFieldChange={handleFieldChange}
+                />
+              </ContainerHeader>
           ))}
         </div>
       </Container>
