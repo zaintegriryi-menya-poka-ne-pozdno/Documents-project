@@ -24,27 +24,17 @@ const DocsLabels = {
   tth: {
     name: 'ТТН',
     fields: [
-      { nameId: 'tip_dostavki',   id: 133147, typeValue: 'select',    name: 'Тип доставки' }, 
-      { nameId: 'vid_transporta', id: 133151, typeValue: 'select',    name: 'Вид транспорта' },
-      { nameId: 'vid_oplati',     id: 133373, typeValue: 'select',    name: 'Форма оплаты' }, 
-      { nameId: 'gde_oplata',     id: 179095, typeValue: 'select',    name: 'Оплата в' }, // форма оплаты
-      
-      { nameId: 'dostavka_do',    id: 133153, typeValue: 'select',    name: 'Адрес/дверь' },
-
-      { nameId: 'otkuda',         id: 179029, typeValue: 'select',    name: 'Откуда' },
-      { nameId: 'otkuda_tochno',  id: 1275901, typeValue: 'textarea',  name: 'Откуда точно' },
-      
-      { nameId: 'kuda',           id: 179035, typeValue: 'select',    name: 'Куда' },
-      { nameId: 'kuda_tochno',    id: 179037, typeValue: 'textarea',  name: 'Куда точно' },
-
-      { nameId: 'adress_dostavki',id: 1586685, typeValue: 'text',      name: 'Адрес доставки' },
-
-      { nameId: 'harakter_gruza', id: 1584461, typeValue: 'select',    name: 'Характер груза' },
-      { nameId: 'vid_upakovki',   id: 179501, typeValue: 'textarea',  name: 'Вид упаковки' },
-      { nameId: 'kolvo_mest',     id: 179505, typeValue: 'number',    name: 'Кол-во мест' }, // максимум 28 может быть число (от 1 до 28)
-    
-      { nameId: 'ves_gruza',      id: 133421, typeValue: 'number',    name: 'Вес груза' },
-      { nameId: 'obem_gruza',     id: 133433, typeValue: 'number',    name: 'Объём  груза' },
+      { nameId: 'exemp_number',id: 1277157, typeValue: 'text',      name: 'Экземпляр' },
+      { nameId: 'is_expedit',   id: 1277159, typeValue: 'select',    name: 'Является экспедитором' },
+      { nameId: 'delivery_adress',id: 1277161, typeValue: 'text',      name: 'Адрес доставки' },
+      { nameId: 'cargo_info',id: 1277163, typeValue: 'text',      name: 'Груз' },
+      { nameId: 'cargo_mass',id: 1277165, typeValue: 'text',      name: 'Масса груза' },
+      { nameId: 'delivery_route_time',id: 1277167, typeValue: 'text',      name: 'Маршрут доставки' },
+      { nameId: 'deliver_reqs',id: 1277169, typeValue: 'text',      name: 'Перевозчик (организация инн адрес тел)' },
+      { nameId: 'load_place',id: 1277171, typeValue: 'text',      name: 'Адрес места погрузки' },
+      { nameId: 'unload_data_time',id: 1277173, typeValue: 'text',      name: 'Заявленные дата и время подачи ТТН' },
+      { nameId: 'cargo_extraction',id: 1277175, typeValue: 'text',      name: 'Адрес места выгрузки' },
+      { nameId: 'cargo_extraction_data_time',id: 1277177, typeValue: 'text',      name: 'Заявленные дата и время выгрузки ТТН' },
     ],
     typeDocs: 'tth',
     createDocs: DocsAPI.createTTH,
@@ -158,7 +148,7 @@ const TTHContainer = ({ type }) => {
   }
 
   const loadDocuments = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277037]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1277137]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
       setDocuments(savedData ? JSON.parse(savedData) : []);
@@ -224,15 +214,15 @@ const TTHContainer = ({ type }) => {
 
 
   const handleGenerateTTH  = async () => {
-    const lead = document.querySelector('#lead_main_user-users_select_holder')
-    const lead_name = lead.querySelector('span').textContent
-    const managers = window.AMOCRM.constant("managers")
-    const matchedManager = Object.values(managers).find(manager => manager.title === lead_name)
-
     const lead_id = document.querySelector('#add_tags')
     const id = Number(lead_id.querySelector('span').textContent.slice(1))
 
     const invoice = document.querySelector('#person_n').textContent
+
+    const lead = document.querySelector('#lead_main_user-users_select_holder')
+    const lead_name = lead.querySelector('span').textContent
+    const managers = window.AMOCRM.constant("managers")
+    const matchedManager = Object.values(managers).find(manager => manager.title === lead_name)
 
     const client = document.querySelector('input[name="CFV[1276573]"]')
 
@@ -245,34 +235,31 @@ const TTHContainer = ({ type }) => {
     const parsedValueD = JSON.parse(rawValueD);
 
     const requestBody = {
-      doc_type: "client_request",
-      filename: "Заявка_по_договору_с_клиентом_для.docx",
+      doc_type: "thh",
+      filename: "ТНН_разраб_для.docx",
       amo_id: id,
-      phone: matchedManager.phone,
-      mail: matchedManager.login,
       number: invoice,
-      dogovor_number: invoice,
-      dogovor_date: fieldValues.dogovor_date,
-      doroga: fieldValues.doroga,
-      price: fieldValues.price,
-      preprice: fieldValues.preprice,
-      times_ways_to_pay: fieldValues.times_ways_to_pay,
-      driver: parsedValueD.name,
-      driver_passport: `${parsedValueD.series} ${parsedValueD.number}`,
-      driver_number: parsedValueD.phone,
-      truck_type: parsedValueD.TipTS,
-      truck: parsedValueD.markaAvto,
-      truck_gos_number: parsedValueD.gosNomer,
-      pricep: parsedValueD.TipPricepa,
-      pricep_gos_number: parsedValueD.pp,
-      customer_company: parsedValue.name,
-      customer_director_name: parsedValue.contactPerson,
-      customer_inn: parsedValue.inn,
-      customer_kpp: parsedValue.kpp,
-      dop_info: fieldValues.dop_info,
-      services_1,
-      services_2,
-      services_3
+      number_nakl: invoice,
+      customer_reqs: `${parsedValue.name}, ${parsedValue.inn}, ${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}, ${parsedValue.company_phone}`,
+      driver_reqs: `${parsedValueD.name}, ${parsedValue.inn}`,
+      truck_info: parsedValueD.markaAvto,
+      truck_number: parsedValueD.gosNomer,
+      driver_signature: parsedValueD.name,
+      economic_driver_reqs: `${parsedValue.name}, ${parsedValue.inn}`,
+      economic_shipper_reqs: parsedValue.inn,
+      exemp_number: fieldValues.exemp_number,
+      is_expedit: fieldValues.is_expedit,
+      delivery_adress: fieldValues.delivery_adress,
+      cargo_info: fieldValues.cargo_info,
+      cargo_mass: fieldValues.cargo_mass,
+      delivery_route_time: fieldValues.delivery_route_time,
+      deliver_reqs: fieldValues.deliver_reqs,
+      load_place: fieldValues.load_place,
+      unload_data_time: fieldValues.unload_data_time,
+      mass_brutto: fieldValues.cargo_mass,
+      cargo_different_mass: fieldValues.cargo_mass,
+      cargo_extraction: fieldValues.cargo_extraction,
+      cargo_extraction_data_time: fieldValues.cargo_extraction_data_time,
     };
 
     console.log(JSON.stringify(requestBody, null, 2))
@@ -311,9 +298,9 @@ const TTHContainer = ({ type }) => {
   }, [documents]);
 
   const handleUpdateDocuments = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277037]"]`)
+    const inputElement = document.querySelector(`input[name="CFV[1277137]"]`)
     if (inputElement) {
-      updateInputValue('1277037', JSON.stringify(documents || []));
+      updateInputValue('1277137', JSON.stringify(documents || []));
     }
   }
 
@@ -339,7 +326,7 @@ const TTHContainer = ({ type }) => {
         style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}
         className={DocsLabels[type].files}
       >
-        <FilesContainer dataDocs={dataDocs} />
+        <FilesContainer dataDocs={documents} name={'ТНН_разраб_для.docx'} />
       </Container>
 
       <CustomButton
