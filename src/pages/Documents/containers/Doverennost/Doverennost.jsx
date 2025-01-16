@@ -18,33 +18,15 @@ import {
 import CustomFields from '../CustomFields/CustomFields';
 import FilesContainer from '../FilesContainer/FilesContainer';
 import CustomButton from '../../../../components/CustomButton/CustomButton'
+import {banks} from '../banks'
 
 
 const DocsLabels = {
   doverennost: {
     name: 'Доверенность',
     fields: [
-      { nameId: 'tip_dostavki',   id: 133147, typeValue: 'select',    name: 'Тип доставки' }, 
-      { nameId: 'vid_transporta', id: 133151, typeValue: 'select',    name: 'Вид транспорта' },
-      { nameId: 'vid_oplati',     id: 133373, typeValue: 'select',    name: 'Форма оплаты' }, 
-      { nameId: 'gde_oplata',     id: 179095, typeValue: 'select',    name: 'Оплата в' }, // форма оплаты
-      
-      { nameId: 'dostavka_do',    id: 133153, typeValue: 'select',    name: 'Адрес/дверь' },
-
-      { nameId: 'otkuda',         id: 179029, typeValue: 'select',    name: 'Откуда' },
-      { nameId: 'otkuda_tochno',  id: 1275901, typeValue: 'textarea',  name: 'Откуда точно' },
-      
-      { nameId: 'kuda',           id: 179035, typeValue: 'select',    name: 'Куда' },
-      { nameId: 'kuda_tochno',    id: 179037, typeValue: 'textarea',  name: 'Куда точно' },
-
-      { nameId: 'adress_dostavki',id: 1586685, typeValue: 'text',      name: 'Адрес доставки' },
-
-      { nameId: 'harakter_gruza', id: 1584461, typeValue: 'select',    name: 'Характер груза' },
-      { nameId: 'vid_upakovki',   id: 179501, typeValue: 'textarea',  name: 'Вид упаковки' },
-      { nameId: 'kolvo_mest',     id: 179505, typeValue: 'number',    name: 'Кол-во мест' }, // максимум 28 может быть число (от 1 до 28)
-    
-      { nameId: 'ves_gruza',      id: 133421, typeValue: 'number',    name: 'Вес груза' },
-      { nameId: 'obem_gruza',     id: 133433, typeValue: 'number',    name: 'Объём  груза' },
+      { nameId: 'bank', id: 1277183, typeValue: 'select', name: 'Банк' },
+      { nameId: 'document_number_data', id: 1277185, typeValue: 'text', name: 'Материальных ценностей по' },
     ],
     typeDocs: 'doverennost',
     createDocs: DocsAPI.createDoverennost,
@@ -83,6 +65,8 @@ const DoverennostContainer = ({ type }) => {
     contact: {},
     company: {},
   });
+
+  const [tableData, setTableData] = useState([]);
 
   const extractEntities = () => {
     const newEntities = {
@@ -157,8 +141,18 @@ const DoverennostContainer = ({ type }) => {
     }
   }
 
+  const loadTableData = () => {
+    const inputElement = document.querySelector(`input[name="CFV[1277187]"]`);
+    if (inputElement) {
+      const savedData = inputElement.value;
+      if (savedData) {
+        setTableData(JSON.parse(savedData));
+      }
+    }
+  };
+
   const loadDocuments = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277037]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1273713]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
       setDocuments(savedData ? JSON.parse(savedData) : []);
@@ -170,6 +164,7 @@ const DoverennostContainer = ({ type }) => {
   useEffect(() => {
     fetchDataInfo()
     loadDocuments()
+    loadTableData()
 
     const observer1 = new MutationObserver((mutationsList, observer) => {
       for (let mutation of mutationsList) {
@@ -224,15 +219,12 @@ const DoverennostContainer = ({ type }) => {
 
 
   const handleGenerateDoverennost  = async () => {
-    const lead = document.querySelector('#lead_main_user-users_select_holder')
-    const lead_name = lead.querySelector('span').textContent
-    const managers = window.AMOCRM.constant("managers")
-    const matchedManager = Object.values(managers).find(manager => manager.title === lead_name)
-
     const lead_id = document.querySelector('#add_tags')
     const id = Number(lead_id.querySelector('span').textContent.slice(1))
 
     const invoice = document.querySelector('#person_n').textContent
+
+    const selected_bank = banks.find(bank => bank.name === fieldValues.bank.trim())
 
     const client = document.querySelector('input[name="CFV[1276573]"]')
 
@@ -243,36 +235,37 @@ const DoverennostContainer = ({ type }) => {
 
     const rawValueD = driver.value;
     const parsedValueD = JSON.parse(rawValueD);
+    
+    const services = tableData.map((item, index) => {
+      return {
+        cargo_number: (index + 1).toString(),
+        cargo_info: item.cargo_info,
+        cargo_type: item.cargo_type,
+        cargo_unit: item.cargo_unit,
+      }
+    })
 
     const requestBody = {
-      doc_type: "client_request",
-      filename: "Заявка_по_договору_с_клиентом_для.docx",
+      doc_type: "dovr",
+      filename: "Довр_разраб_для.docx",
       amo_id: id,
-      phone: matchedManager.phone,
-      mail: matchedManager.login,
-      number: invoice,
-      dogovor_number: invoice,
-      dogovor_date: fieldValues.dogovor_date,
-      doroga: fieldValues.doroga,
-      price: fieldValues.price,
-      preprice: fieldValues.preprice,
-      times_ways_to_pay: fieldValues.times_ways_to_pay,
+      number_dovr: invoice,
+      getter_dovr: parsedValueD.name,
+      giver_dovr: parsedValue.name,
       driver: parsedValueD.name,
-      driver_passport: `${parsedValueD.series} ${parsedValueD.number}`,
-      driver_number: parsedValueD.phone,
-      truck_type: parsedValueD.TipTS,
-      truck: parsedValueD.markaAvto,
-      truck_gos_number: parsedValueD.gosNomer,
-      pricep: parsedValueD.TipPricepa,
-      pricep_gos_number: parsedValueD.pp,
-      customer_company: parsedValue.name,
-      customer_director_name: parsedValue.contactPerson,
-      customer_inn: parsedValue.inn,
-      customer_kpp: parsedValue.kpp,
-      dop_info: fieldValues.dop_info,
-      services_1,
-      services_2,
-      services_3
+      position: parsedValueD.name,
+      duration_dovr: "срок действия",
+      passport_series: parsedValueD.series,
+      passport_number: parsedValueD.number,
+      passport_by_who: parsedValueD.issuedBy,
+      passport_data: parsedValueD.issueDate,
+      auto_info: parsedValueD.markaAvto,
+      bank_adress: selected_bank.bank_adress,
+      biq: selected_bank.biq,
+      korr_bill: selected_bank.korr_bill,
+      raschetny_bill: selected_bank.raschetny_bill,
+      document_number_data: fieldValues.document_number_data,
+      services
     };
 
     console.log(JSON.stringify(requestBody, null, 2))
@@ -310,10 +303,32 @@ const DoverennostContainer = ({ type }) => {
     handleUpdateDocuments();
   }, [documents]);
 
-  const handleUpdateDocuments = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277037]"]`)
+  const handleAddRow = () => {
+    setTableData([...tableData, { cargo_info: '', cargo_type: '', cargo_unit: '' }]);
+  };
+
+  const handleRemoveRow = (index) => {
+    const newData = tableData.filter((_, i) => i !== index);
+    setTableData(newData);
+  };
+
+  const handleSaveTable = () => {
+    const inputElement = document.querySelector(`input[name="CFV[1277187]"]`);
     if (inputElement) {
-      updateInputValue('1277037', JSON.stringify(documents || []));
+      updateInputValue('1277187', JSON.stringify(tableData));
+    }
+  };
+
+  const handleTableChange = (index, field, value) => {
+    const newData = [...tableData];
+    newData[index][field] = value;
+    setTableData(newData);
+  };
+
+  const handleUpdateDocuments = () => {
+    const inputElement = document.querySelector(`input[name="CFV[1273713]"]`)
+    if (inputElement) {
+      updateInputValue('1273713', JSON.stringify(documents || []));
     }
   }
 
@@ -328,65 +343,134 @@ const DoverennostContainer = ({ type }) => {
   };
 
   return (
-    <Container>
+      <div>
+        <Container>
 
-      <ContainerHeader style={{ marginBottom: '15px' }}>
-        <ContainerLeft style={{ fontWeight: 'bold', fontSize: '16px' }}>{name}</ContainerLeft>
-        <ContainerRight>Sett.</ContainerRight>
-      </ContainerHeader>
+          <ContainerHeader style={{ marginBottom: '15px' }}>
+            <ContainerLeft style={{ fontWeight: 'bold', fontSize: '16px' }}>{name}</ContainerLeft>
+            <ContainerRight>Sett.</ContainerRight>
+          </ContainerHeader>
 
-      <Container
-        style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}
-        className={DocsLabels[type].files}
-      >
-        <FilesContainer dataDocs={dataDocs} />
-      </Container>
+          <Container
+              style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}
+              className={DocsLabels[type].files}
+          >
+            <FilesContainer dataDocs={documents} name={'Довр_разраб_для.docx'} />
+          </Container>
 
-      <CustomButton
-        text={isLoading ? 'Загрузка...' : 'Сгенерировать экспед. расписку'}
-        padding={'4px'}
-        color={allFieldsFilled ? 'green' : 'red'}
-        onClick={handleGenerateDoverennost}
-        style={{
-          width: '230px',
-          margin: '15px 0 15px 0',
-          opacity: isLoading ? 0.7 : 1, // уменьшить прозрачность кнопки во время загрузки
-          cursor: isLoading ? 'progress' : 'pointer' // изменить курсор во время загрузки
-        }}
-        disabled={isLoading} // отключить кнопку во время загрузки
-      />
+          <CustomButton
+              text={isLoading ? 'Загрузка...' : 'Сгенерировать экспед. расписку'}
+              padding={'4px'}
+              color={allFieldsFilled ? 'green' : 'red'}
+              onClick={handleGenerateDoverennost}
+              style={{
+                width: '230px',
+                margin: '15px 0 15px 0',
+                opacity: isLoading ? 0.7 : 1, // уменьшить прозрачность кнопки во время загрузки
+                cursor: isLoading ? 'progress' : 'pointer' // изменить курсор во время загрузки
+              }}
+              disabled={isLoading} // отключить кнопку во время загрузки
+          />
 
-      <Container style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}>
+          <Container style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}>
 
-        <div style={{marginTop: '5px', marginBottom: '5px'}}>
-          {customFields.map((field, index) => (
-              <ContainerHeader key={index}
-                               style={{color: getEntityName(field.entity) !== 'данные отсутствуют' ? 'green' : 'red'}}>
-                <ContainerLeft style={{flex: 4}}>
-                  {field.name}
-                </ContainerLeft>
-                <ContainerRight style={{flex: 7, justifyContent: 'flex-start', paddingLeft: '8px'}}>
-                  {getEntityName(field.entity)}
-                </ContainerRight>
-              </ContainerHeader>
-          ))}
-        </div>
+            <div style={{marginTop: '5px', marginBottom: '5px'}}>
+              {customFields.map((field, index) => (
+                  <ContainerHeader key={index}
+                                   style={{color: getEntityName(field.entity) !== 'данные отсутствуют' ? 'green' : 'red'}}>
+                    <ContainerLeft style={{flex: 4}}>
+                      {field.name}
+                    </ContainerLeft>
+                    <ContainerRight style={{flex: 7, justifyContent: 'flex-start', paddingLeft: '8px'}}>
+                      {getEntityName(field.entity)}
+                    </ContainerRight>
+                  </ContainerHeader>
+              ))}
+            </div>
 
-        <div className="clientrequest_fields__container">
-          {fields.map(field => (
-              <ContainerHeader key={field.id}>
-                <CustomFields
-                    id={field.id}
-                    type={field.typeValue}
-                    name={field.name}
-                    nameId={field.nameId}
-                    onFieldChange={handleFieldChange}
-                />
-              </ContainerHeader>
-          ))}
-        </div>
-      </Container>
-    </Container>
+            <div className="clientrequest_fields__container">
+              {fields.map(field => (
+                  <ContainerHeader key={field.id}>
+                    <CustomFields
+                        id={field.id}
+                        type={field.typeValue}
+                        name={field.name}
+                        nameId={field.nameId}
+                        onFieldChange={handleFieldChange}
+                    />
+                  </ContainerHeader>
+              ))}
+            </div>
+          </Container>
+        </Container>
+
+        <Container style={{
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '17px',
+          borderRadius: '11px',
+          border: '1px solid #ABABAB',
+          overflowX: 'hidden'
+        }}>
+          <table style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            textAlign: 'left',
+            maxWidth: '100%',
+            fontSize: '12px'
+          }}>
+            <thead>
+            <tr style={{ backgroundColor: '#f2f2f2' }}>
+              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '10px' }}>№</th>
+              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '120px' }}>Материальные ценности</th>
+              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '30px' }}>Единица измерения</th>
+              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '40px' }}>Количество</th>
+              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '20px' }}></th>
+            </tr>
+            </thead>
+            <tbody>
+            {tableData.map((row, index) => (
+                <tr key={index}>
+                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>{index + 1}</td>
+                  <td style={{ border: '1px solid #ddd', padding: '6px', wordBreak: 'break-word', whiteSpace: 'normal' }}>
+                    <input
+                        type="text"
+                        value={row.cargo_info}
+                        onChange={(e) => handleTableChange(index, 'cargo_info', e.target.value)}
+                        style={{ width: '100%', border: 'none', outline: 'none' }}
+                    />
+                  </td>
+                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                    <input
+                        type="text"
+                        value={row.cargo_type}
+                        onChange={(e) => handleTableChange(index, 'cargo_type', e.target.value)}
+                        style={{ width: '100%', border: 'none', outline: 'none', appearance: 'none', MozAppearance: 'textfield',WebkitAppearance: 'none' }}
+                    />
+                  </td>
+                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                    <input
+                        type="text"
+                        value={row.cargo_unit}
+                        onChange={(e) => handleTableChange(index, 'cargo_unit', e.target.value)}
+                        style={{ width: '100%', border: 'none', outline: 'none' }}
+                    />
+                  </td>
+                  <td style={{ border: '1px solid #ddd', padding: '6px', textAlign: 'center' }}>
+                    <div onClick={() => handleRemoveRow(index)} style={{ cursor: 'pointer' }}>✖</div>
+                  </td>
+                </tr>
+            ))}
+            </tbody>
+          </table>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+            <div onClick={handleAddRow} style={{ cursor: 'pointer', color: 'blue' }}>Добавить запись</div>
+            {tableData.length > 0 && (
+                <div onClick={handleSaveTable} style={{ cursor: 'pointer', color: 'green' }}>Сохранить</div>
+            )}
+          </div>
+        </Container>
+      </div>
   )
 };
 
