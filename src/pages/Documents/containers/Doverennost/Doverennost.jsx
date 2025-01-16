@@ -27,6 +27,7 @@ const DocsLabels = {
     fields: [
       { nameId: 'bank', id: 1277183, typeValue: 'select', name: 'Банк' },
       { nameId: 'document_number_data', id: 1277185, typeValue: 'text', name: 'Материальных ценностей по' },
+      { nameId: 'duration_dovr', id: 1277189, typeValue: 'text', name: 'Срок действия' },
     ],
     typeDocs: 'doverennost',
     createDocs: DocsAPI.createDoverennost,
@@ -254,7 +255,7 @@ const DoverennostContainer = ({ type }) => {
       giver_dovr: parsedValue.name,
       driver: parsedValueD.name,
       position: parsedValueD.name,
-      duration_dovr: "срок действия",
+      duration_dovr: fieldValues.duration_dovr,
       passport_series: parsedValueD.series,
       passport_number: parsedValueD.number,
       passport_by_who: parsedValueD.issuedBy,
