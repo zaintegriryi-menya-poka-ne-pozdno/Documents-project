@@ -115,29 +115,40 @@ const CheckContainer = ({ type }) => {
   };
 
   const fetchDataInfo = async () => {
-    const fetchInfoDocs = DocsAPI.fetchDocsInfo;
-    const dataInfoDocs = await fetchInfoDocs(DocsLabels[type].typeDocs);
-    setDataDocs(dataInfoDocs);
-    console.log('dataInfoDocs', dataInfoDocs);
+    try {
+      const fetchInfoDocs = DocsAPI.fetchDocsInfo
+      const dataInfoDocs = await fetchInfoDocs(DocsLabels[type].typeDocs)
 
-    const latestDoc = dataInfoDocs.docs.reduce((latest, current) => {
-      return current.timestamp > latest.timestamp ? current : latest;
-    }, dataInfoDocs.docs[0]);
-    
-    const latestName = latestDoc ? latestDoc.name : undefined;
+      // Проверка, является ли dataInfoDocs объектом и содержит ли свойство docs с массивом
+      if (!dataInfoDocs || !Array.isArray(dataInfoDocs.docs) || dataInfoDocs.docs.length === 0) {
+        //console.error('No documents found or invalid response structure')
+        return
+      }
 
-    if (latestName !== undefined) {
+      setDataDocs(dataInfoDocs)
+
+      // Найти последний документ по timestamp
+      const latestDoc = dataInfoDocs.docs.reduce((latest, current) => {
+        return current.timestamp > latest.timestamp ? current : latest
+      }, dataInfoDocs.docs[0])
+
+      const latestName = latestDoc ? latestDoc.name : undefined
+
+      if (latestName !== undefined) {
         const updateInputValue = (name, newValue) => {
-          const element = document.querySelector(`[data-id="${name}"]`);
+          const element = document.querySelector(`[data-id="${name}"]`)
           if (element) {
-            const input = element.querySelector('input');
+            const input = element.querySelector('input')
             if (input) {
-              input.value = newValue;
-              input.dispatchEvent(new Event('input', { bubbles: true }));
+              input.value = newValue
+              input.dispatchEvent(new Event('input', { bubbles: true }))
             }
           }
-        };
-        updateInputValue('1447475', latestName);
+        }
+        updateInputValue('1447475', latestName)
+      }
+    } catch (error) {
+      console.error('Error fetching documents:', error)
     }
   }
 
@@ -146,9 +157,9 @@ const CheckContainer = ({ type }) => {
     const driver = document.querySelector('input[name="CFV[1276575]"]')
 
     const rawValueD = driver.value;
-    const parsedValueD = JSON.parse(rawValueD);
+    const parsedValueD = rawValueD ? JSON.parse(rawValueD) : {name: '', markaAvto: '', gosNomer: '', pp: ''};
 
-    const name = `Транспортно-экспедиционные услуги, маршрут: ${way}, водитель: ${parsedValueD.name} авт.: ${parsedValueD.markaAvto}, г/н: ${parsedValueD.gosNomer}, п/п: ${parsedValueD.pp}`
+    const name = `Транспортно-экспедиционные услуги, маршрут: ${way ? way : ''}, водитель: ${parsedValueD.name} авт.: ${parsedValueD.markaAvto}, г/н: ${parsedValueD.gosNomer}, п/п: ${parsedValueD.pp}`
 
     return name
   }
@@ -157,8 +168,9 @@ const CheckContainer = ({ type }) => {
     const inputElement = document.querySelector(`input[name="CFV[1276507]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
-      const table = JSON.parse(savedData);
-      table[0].name = createName()
+      const table = savedData ? JSON.parse(savedData) : [];
+      if (table.length === 0) table.push({name: '', quantity: '', unit:''});
+      table[0].name = createName() || ''
       if (savedData) {
         setTableData(table);
       }
@@ -212,7 +224,6 @@ const CheckContainer = ({ type }) => {
             const numberMatch = element.textContent.match(/\d+/);
             if (numberMatch) {
               const number = parseInt(numberMatch[0], 10);
-              console.log(number);
               setSummTotal(number);
             }
             break;
@@ -281,6 +292,8 @@ const CheckContainer = ({ type }) => {
       street: parsedValue.street,
       building: parsedValue.building,
       office: parsedValue.office,
+      customer_org_type: parsedValue.customer_org_type,
+      customer_org_type_short: parsedValue.customer_org_type_short,
       customer_emb_info: [
         `Юридический  адрес: ${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}`,
         `Почтовый  адрес: ${fieldValues.post_adress}`,
@@ -291,8 +304,6 @@ const CheckContainer = ({ type }) => {
       ],
       services,
     };
-
-    // console.log(JSON.stringify(requestBody, null, 2))
 
     setIsLoading(true);
 

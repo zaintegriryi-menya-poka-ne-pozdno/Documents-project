@@ -18,16 +18,25 @@ import {
 import CustomFields from '../CustomFields/CustomFields';
 import FilesContainer from '../FilesContainer/FilesContainer';
 import CustomButton from '../../../../components/CustomButton/CustomButton'
+import {banks} from '../banks'
 
 
 const DocsLabels = {
-  ypd: {
-    name: 'УПД',
+  kp: {
+    name: 'КП',
     fields: [
+      { nameId: 'bank',  id: 1277107, typeValue: 'select',  name: 'Банк' },
+      { nameId: 'period_time',  id: 1277109, typeValue: 'text',  name: 'Период' },
+      { nameId: 'Cargo',  id: 1277111, typeValue: 'text',  name: 'Груз' },
+      { nameId: 'Route',  id: 1277113, typeValue: 'text',  name: 'Маршрут' },
+      { nameId: 'TruckCost',  id: 1277115, typeValue: 'text',  name: 'Стоимость доставки (место в фуре/догруз)' },
+      { nameId: 'VehicleCost',  id: 1277117, typeValue: 'text',  name: 'Стоимость доставки (выделенное ТС)' },
+      { nameId: 'DeliveryTime',  id: 1277119, typeValue: 'text',  name: 'Срок доставки' },
+      { nameId: 'DeliverySearchTime',  id: 1277121, typeValue: 'text',  name: 'Срок поиска варианта доставки' },
     ],
-    typeDocs: 'ypd',
-    createDocs: DocsAPI.createYPD,
-    files: 'ypd__list_docs'
+    typeDocs: 'kp',
+    createDocs: DocsAPI.createKP,
+    files: 'kp__list_docs'
   }
 };
 
@@ -42,12 +51,14 @@ const updateInputValue = (name, newValue) => {
   }
 };
 
+
 const customFields = [
   { name: 'Клиент',  entity: 'company'    },
   { name: 'Водитель',   entity: 'contact' }
 ];
 
-const YPDContainer = ({ type }) => {
+
+const KPContainer = ({ type }) => {
   const [allFieldsFilled, setAllFieldsFilled] = useState(false);
   const [fieldValues, setFieldValues] = useState({});
   const [dataDocs, setDataDocs] = useState(null);
@@ -62,18 +73,6 @@ const YPDContainer = ({ type }) => {
     contact: {},
     company: {},
   });
-
-  const createName = () => {
-    const way = document.querySelector('input[name="CFV[1279389]"]').value;
-    const driver = document.querySelector('input[name="CFV[1276575]"]')
-
-    const rawValueD = driver.value;
-    const parsedValueD = JSON.parse(rawValueD);
-
-    const name = `Транспортно-экспедиционные услуги, маршрут: ${way}, водитель: ${parsedValueD.name} авт.: ${parsedValueD.markaAvto}, г/н: ${parsedValueD.gosNomer}, п/п: ${parsedValueD.pp}`
-
-    return name
-  }
 
   const extractEntities = () => {
     const newEntities = {
@@ -122,45 +121,33 @@ const YPDContainer = ({ type }) => {
   };
 
   const fetchDataInfo = async () => {
-    try {
-      const fetchInfoDocs = DocsAPI.fetchDocsInfo
-      const dataInfoDocs = await fetchInfoDocs(DocsLabels[type].typeDocs)
+    const fetchInfoDocs = DocsAPI.fetchDocsInfo;
+    const dataInfoDocs = await fetchInfoDocs(DocsLabels[type].typeDocs);
+    setDataDocs(dataInfoDocs);
 
-      // Проверка, является ли dataInfoDocs объектом и содержит ли свойство docs с массивом
-      if (!dataInfoDocs || !Array.isArray(dataInfoDocs.docs) || dataInfoDocs.docs.length === 0) {
-        //console.error('No documents found or invalid response structure')
-        return
-      }
+    const latestDoc = dataInfoDocs.docs.reduce((latest, current) => {
+      return current.timestamp > latest.timestamp ? current : latest;
+    }, dataInfoDocs.docs[0]);
 
-      setDataDocs(dataInfoDocs)
+    const latestName = latestDoc ? latestDoc.name : undefined;
 
-      // Найти последний документ по timestamp
-      const latestDoc = dataInfoDocs.docs.reduce((latest, current) => {
-        return current.timestamp > latest.timestamp ? current : latest
-      }, dataInfoDocs.docs[0])
-
-      const latestName = latestDoc ? latestDoc.name : undefined
-
-      if (latestName !== undefined) {
-        const updateInputValue = (name, newValue) => {
-          const element = document.querySelector(`[data-id="${name}"]`)
-          if (element) {
-            const input = element.querySelector('input')
-            if (input) {
-              input.value = newValue
-              input.dispatchEvent(new Event('input', { bubbles: true }))
-            }
+    if (latestName !== undefined) {
+      const updateInputValue = (name, newValue) => {
+        const element = document.querySelector(`[data-id="${name}"]`);
+        if (element) {
+          const input = element.querySelector('input');
+          if (input) {
+            input.value = newValue;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
           }
         }
-        updateInputValue('1447475', latestName)
-      }
-    } catch (error) {
-      console.error('Error fetching documents:', error)
+      };
+      updateInputValue('1447475', latestName);
     }
   }
 
   const loadDocuments = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277135]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1277123]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
       setDocuments(savedData ? JSON.parse(savedData) : []);
@@ -224,29 +211,33 @@ const YPDContainer = ({ type }) => {
   }, [fieldValues, entities]);
 
 
-  const handleGenerateYPD  = async () => {
+  const handleGenerateKP  = async () => {
+    const lead = document.querySelector('#lead_main_user-users_select_holder')
+    const lead_name = lead.querySelector('span').textContent
+    const managers = window.AMOCRM.constant("managers")
+    const matchedManager = Object.values(managers).find(manager => manager.title === lead_name)
+
     const lead_id = document.querySelector('#add_tags')
     const id = Number(lead_id.querySelector('span').textContent.slice(1))
 
-    const invoice = document.querySelector('input[name="CFV[1279355]"]')
-
-    const client = document.querySelector('input[name="CFV[1276573]"]')
-    const rawValue = client.value;
-    const parsedValue = JSON.parse(rawValue);
+    const selected_bank = banks.find(bank => bank.name === fieldValues.bank.trim())
 
     const requestBody = {
-      doc_type: "upd",
-      filename: "УПД_разраб_для.doc",
+      doc_type: "komal",
+      filename: "КП_для_КомАль_для.docx",
       amo_id: id,
-      buyer_info: parsedValue.name,
-      kpp: parsedValue.kpp,
-      inn: parsedValue.inn,
-      buyer_adress: `${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}`,
-      buyer_inn: `${parsedValue.inn}/${parsedValue.kpp}`,
-      bill_number: invoice.value,
-      tovar_name: createName(),
-      price_without_tax: document.querySelector('input[name="lead[PRICE]"]').value,
-      customer_org_type: parsedValue.customer_org_type,
+      phone: matchedManager.phone,
+      mail: matchedManager.login,
+      bank_adress: selected_bank.bank_adress,
+      biq: selected_bank.biq,
+      korr_bill: selected_bank.korr_bill,
+      raschetny_bill: selected_bank.raschetny_bill,
+      Cargo: fieldValues.Cargo,
+      Route: fieldValues.Route,
+      TruckCost: fieldValues.TruckCost,
+      VehicleCost: fieldValues.VehicleCost,
+      DeliveryTime: fieldValues.DeliveryTime,
+      DeliverySearchTime: fieldValues.DeliverySearchTime
     };
 
 
@@ -284,9 +275,9 @@ const YPDContainer = ({ type }) => {
   }, [documents]);
 
   const handleUpdateDocuments = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277135]"]`)
+    const inputElement = document.querySelector(`input[name="CFV[1277123]"]`)
     if (inputElement) {
-      updateInputValue('1277135', JSON.stringify(documents || []));
+      updateInputValue('1277123', JSON.stringify(documents || []));
     }
   }
 
@@ -302,7 +293,6 @@ const YPDContainer = ({ type }) => {
 
   return (
     <Container>
-
       <ContainerHeader style={{ marginBottom: '15px' }}>
         <ContainerLeft style={{ fontWeight: 'bold', fontSize: '16px' }}>{name}</ContainerLeft>
         <ContainerRight>Sett.</ContainerRight>
@@ -312,14 +302,14 @@ const YPDContainer = ({ type }) => {
         style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}
         className={DocsLabels[type].files}
       >
-        <FilesContainer dataDocs={documents} name={'УПД_разраб_для.docx'} />
+        <FilesContainer dataDocs={documents} name={'КП_для_КомАль_для.docx'} />
       </Container>
 
       <CustomButton
-        text={isLoading ? 'Загрузка...' : 'Сгенерировать УПД'}
+        text={isLoading ? 'Загрузка...' : 'Сгенерировать КП'}
         padding={'4px'}
         color={allFieldsFilled ? 'green' : 'red'}
-        onClick={handleGenerateYPD}
+        onClick={handleGenerateKP}
         style={{
           width: '230px',
           margin: '15px 0 15px 0',
@@ -329,8 +319,7 @@ const YPDContainer = ({ type }) => {
         disabled={isLoading} // отключить кнопку во время загрузки
       />
 
-      <Container style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}>
-
+      <Container style={{padding: '5px 10px 10px 10px', borderRadius: '6px'}}>
         <div style={{marginTop: '5px', marginBottom: '5px'}}>
           {customFields.map((field, index) => (
               <ContainerHeader key={index}
@@ -359,9 +348,8 @@ const YPDContainer = ({ type }) => {
           ))}
         </div>
       </Container>
-
     </Container>
   )
 };
 
-export default YPDContainer;
+export default KPContainer;

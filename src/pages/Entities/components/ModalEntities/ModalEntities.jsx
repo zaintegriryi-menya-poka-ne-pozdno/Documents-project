@@ -125,12 +125,13 @@ const ModalEntities = ({ isOpen, onClose, type, dataSearch, setDataSearch, entit
       let bankData = null;
 
 
+
       if (dataCompanyResult) {
         let formDaData
         if (typeOrg === 'ИП') {
           formDaData = {
             carrier_inn: formData.carrier_inn,
-            carrier_name: companyData.name.short_with_opf,
+            carrier_name: companyData.name.full,
             carrier_contactPerson: companyData.name.full,
             carrier_ogrnip: companyData.ogrn,
             carrier_postalСode: companyData.address.data.postal_code,
@@ -144,7 +145,7 @@ const ModalEntities = ({ isOpen, onClose, type, dataSearch, setDataSearch, entit
         } else if (typeOrg === 'ООО') {
           formDaData = {
             carrier_inn: formData.carrier_inn,
-            carrier_name: companyData.name.short_with_opf,
+            carrier_name: companyData.name.short,
             carrier_contactPerson: companyData.management.name,
             carrier_position: companyData.management.post,
             carrier_kpp: companyData.kpp,
@@ -171,7 +172,6 @@ const ModalEntities = ({ isOpen, onClose, type, dataSearch, setDataSearch, entit
         }
 
         setFormData(formDaData);
-        console.log(formDaData)
       }
     } else if (type === 'company') {
         const getCompanyByINN = EntityAPI.fetchCompanyByINN;
@@ -191,7 +191,7 @@ const ModalEntities = ({ isOpen, onClose, type, dataSearch, setDataSearch, entit
           if (typeOrg === 'ИП') {
             formDaData = {
               inn: formData.inn,
-              name: companyData.name.short_with_opf,
+              name: companyData.name.full,
               contactPerson: companyData.name.full,
               ogrnip: companyData.ogrn,
               postalСode: companyData.address.data.postal_code,
@@ -205,7 +205,7 @@ const ModalEntities = ({ isOpen, onClose, type, dataSearch, setDataSearch, entit
           } else if (typeOrg === 'ООО') {
             formDaData = {
               inn: formData.inn,
-              name: companyData.name.short_with_opf,
+              name: companyData.name.short,
               contactPerson: companyData.management.name,
               position: companyData.management.post,
               kpp: companyData.kpp,
@@ -233,7 +233,6 @@ const ModalEntities = ({ isOpen, onClose, type, dataSearch, setDataSearch, entit
           }
 
           setFormData(formDaData);
-          console.log(formDaData)
       }
     }
   };

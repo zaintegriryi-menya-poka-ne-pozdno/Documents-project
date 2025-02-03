@@ -20,17 +20,18 @@ import FilesContainer from '../FilesContainer/FilesContainer';
 import CustomButton from '../../../../components/CustomButton/CustomButton'
 
 
+
 const DocsLabels = {
-  clientrequest: {
-    name: 'Заявка с клиентом',
+  onetimerequest: {
+    name: 'Заявка разовая с клиентом',
     fields: [
-      { nameId: 'preprice',  id: 1277051, typeValue: 'text',  name: 'Предоплата' },
-      { nameId: 'times_ways_to_pay',  id: 1277053, typeValue: 'text',  name: 'Сроки и условия оплаты' },
-      { nameId: 'dop_info',  id: 1277059, typeValue: 'text',  name: 'Дополнительная информация' },
+      { nameId: 'preprice',  id: 1277075, typeValue: 'text',  name: 'Предоплата' },
+      { nameId: 'times_ways_to_pay',  id: 1277077, typeValue: 'text',  name: 'Сроки и условия оплаты' },
+      { nameId: 'dop_info',  id: 1277079, typeValue: 'text',  name: 'Дополнительная информация' },
     ],
-    typeDocs: 'clientrequest',
-    createDocs: DocsAPI.createClientRequest,
-    files: 'clientrequest__list_docs'
+    typeDocs: 'onetimerequest',
+    createDocs: DocsAPI.createOneTimeRequest ,
+    files: 'onetimerequest__list_docs'
   }
 };
 
@@ -51,7 +52,7 @@ const customFields = [
 ];
 
 
-const ClientRequestContainer = ({ type }) => {
+const OneTimeRequestContainer = ({ type }) => {
   const [allFieldsFilled, setAllFieldsFilled] = useState(false);
   const [fieldValues, setFieldValues] = useState({});
   const [dataDocs, setDataDocs] = useState(null);
@@ -93,7 +94,7 @@ const ClientRequestContainer = ({ type }) => {
 
   const checkAllFieldsFilled = (newEntities) => {
     const areCustomFieldsFilled = customFields.every(field => Object.keys(newEntities[field.entity]).length > 0);
-    
+
     let areFieldsFilled = false;
 
     const contractListDocs = document.querySelector('.clientrequest_fields__container');
@@ -186,7 +187,7 @@ const ClientRequestContainer = ({ type }) => {
   };
 
   const loadDocuments = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277037]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1277067]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
       setDocuments(savedData ? JSON.parse(savedData) : []);
@@ -275,8 +276,8 @@ const ClientRequestContainer = ({ type }) => {
     const parsedValueD = JSON.parse(rawValueD);
 
     const requestBody = {
-      doc_type: "client_request",
-      filename: "Заявка_по_договору_с_клиентом_для.docx",
+      doc_type: "one_time_request",
+      filename: "Заявка_разовая_с_клиентом_для.docx",
       amo_id: id,
       phone: matchedManager.phone,
       mail: matchedManager.login,
@@ -299,7 +300,7 @@ const ClientRequestContainer = ({ type }) => {
       customer_director_name: parsedValue.contactPerson,
       customer_inn: parsedValue.inn,
       customer_kpp: parsedValue.kpp,
-      customer_org_type_short: parsedValue.customer_org_type_short,
+      customer_face: parsedValue.contactPerson,
       dop_info: fieldValues.dop_info,
       services_1,
       services_2,
@@ -389,9 +390,9 @@ const ClientRequestContainer = ({ type }) => {
   };
 
   const handleUpdateDocuments = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277037]"]`)
+    const inputElement = document.querySelector(`input[name="CFV[1277067]"]`)
     if (inputElement) {
-      updateInputValue('1277037', JSON.stringify(documents || []));
+      updateInputValue('1277067', JSON.stringify(documents || []));
     }
   }
 
@@ -426,16 +427,16 @@ const ClientRequestContainer = ({ type }) => {
   return (
       <div>
         <Container>
-          <ContainerHeader style={{ marginBottom: '15px' }}>
-            <ContainerLeft style={{ fontWeight: 'bold', fontSize: '16px' }}>{name}</ContainerLeft>
+          <ContainerHeader style={{marginBottom: '15px'}}>
+            <ContainerLeft style={{fontWeight: 'bold', fontSize: '16px'}}>{name}</ContainerLeft>
             <ContainerRight>Sett.</ContainerRight>
           </ContainerHeader>
 
           <Container
-              style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}
+              style={{padding: '5px 10px 10px 10px', borderRadius: '6px'}}
               className={DocsLabels[type].files}
           >
-            <FilesContainer dataDocs={documents} name={'Заявка_по_договору_с_клиентом_для.docx'} />
+            <FilesContainer dataDocs={documents} name={'Заявка_разовая_с_клиентом_для.docx'}/>
           </Container>
 
           <CustomButton
@@ -452,7 +453,7 @@ const ClientRequestContainer = ({ type }) => {
               disabled={isLoading} // отключить кнопку во время загрузки
           />
 
-          <Container style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}>
+          <Container style={{padding: '5px 10px 10px 10px', borderRadius: '6px'}}>
 
             <div style={{marginTop: '5px', marginBottom: '5px'}}>
               {customFields.map((field, index) => (
@@ -502,71 +503,92 @@ const ClientRequestContainer = ({ type }) => {
             overflowX: 'auto'
           }}>
             <thead>
-            <tr style={{ backgroundColor: '#f2f2f2' }}>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '10px' }}>№</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '120px' }}>Время отгрузки</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '30px' }}>Отправитель</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '40px' }}>Адрес отгрузки</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '50px' }}>Телефон</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '50px' }}>Примечание</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '20px' }}></th>
+            <tr style={{backgroundColor: '#f2f2f2'}}>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '10px'}}>№</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '120px'}}>Время отгрузки</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '30px'}}>Отправитель</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '40px'}}>Адрес отгрузки</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '50px'}}>Телефон</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '50px'}}>Примечание</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '20px'}}></th>
             </tr>
             </thead>
             <tbody>
             {services_1.map((row, index) => (
                 <tr key={index}>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>{index + 1}</td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px', wordBreak: 'break-word', whiteSpace: 'normal' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>{index + 1}</td>
+                  <td style={{border: '1px solid #ddd', padding: '6px', wordBreak: 'break-word', whiteSpace: 'normal'}}>
                     <input
                         type="text"
                         value={row.sender_time}
                         onChange={(e) => handleTableChangeServices_1(index, 'sender_time', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none' }}
+                        style={{width: '100%', border: 'none', outline: 'none'}}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>
                     <input
                         type="text"
                         value={row.cargo_sender_get}
                         onChange={(e) => handleTableChangeServices_1(index, 'cargo_sender_get', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none', appearance: 'none', MozAppearance: 'textfield',WebkitAppearance: 'none' }}
+                        style={{
+                          width: '100%',
+                          border: 'none',
+                          outline: 'none',
+                          appearance: 'none',
+                          MozAppearance: 'textfield',
+                          WebkitAppearance: 'none'
+                        }}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>
                     <input
                         type="text"
                         value={row.address_get}
                         onChange={(e) => handleTableChangeServices_1(index, 'address_get', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none' }}
+                        style={{width: '100%', border: 'none', outline: 'none'}}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>
                     <input
                         type="text"
                         value={row.contact_get}
                         onChange={(e) => handleTableChangeServices_1(index, 'contact_get', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none', appearance: 'none', MozAppearance: 'textfield',WebkitAppearance: 'none' }}
+                        style={{
+                          width: '100%',
+                          border: 'none',
+                          outline: 'none',
+                          appearance: 'none',
+                          MozAppearance: 'textfield',
+                          WebkitAppearance: 'none'
+                        }}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>
                     <input
                         type="text"
                         value={row.smth_else_get}
                         onChange={(e) => handleTableChangeServices_1(index, 'smth_else_get', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none', appearance: 'none', MozAppearance: 'textfield',WebkitAppearance: 'none' }}
+                        style={{
+                          width: '100%',
+                          border: 'none',
+                          outline: 'none',
+                          appearance: 'none',
+                          MozAppearance: 'textfield',
+                          WebkitAppearance: 'none'
+                        }}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px', textAlign: 'center' }}>
-                    <div onClick={() => handleRemoveRowServices_1(index)} style={{ cursor: 'pointer' }}>✖</div>
+                  <td style={{border: '1px solid #ddd', padding: '6px', textAlign: 'center'}}>
+                    <div onClick={() => handleRemoveRowServices_1(index)} style={{cursor: 'pointer'}}>✖</div>
                   </td>
                 </tr>
             ))}
             </tbody>
           </table>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-            <div onClick={handleAddRowServices_1} style={{ cursor: 'pointer', color: 'blue' }}>Добавить запись</div>
+          <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '10px'}}>
+            <div onClick={handleAddRowServices_1} style={{cursor: 'pointer', color: 'blue'}}>Добавить запись</div>
             {services_1.length > 0 && (
-                <div onClick={handleSaveTableServices_1} style={{ cursor: 'pointer', color: 'green' }}>Сохранить</div>
+                <div onClick={handleSaveTableServices_1} style={{cursor: 'pointer', color: 'green'}}>Сохранить</div>
             )}
           </div>
         </Container>
@@ -589,71 +611,92 @@ const ClientRequestContainer = ({ type }) => {
             overflowX: 'auto'
           }}>
             <thead>
-            <tr style={{ backgroundColor: '#f2f2f2' }}>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '10px' }}>№</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '120px' }}>Время разгрузки</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '30px' }}>Получатель</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '40px' }}>Адрес разгрузки</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '50px' }}>Телефон</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '50px' }}>Примечание</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '20px' }}></th>
+            <tr style={{backgroundColor: '#f2f2f2'}}>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '10px'}}>№</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '120px'}}>Время разгрузки</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '30px'}}>Получатель</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '40px'}}>Адрес разгрузки</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '50px'}}>Телефон</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '50px'}}>Примечание</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '20px'}}></th>
             </tr>
             </thead>
             <tbody>
             {services_2.map((row, index) => (
                 <tr key={index}>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>{index + 1}</td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px', wordBreak: 'break-word', whiteSpace: 'normal' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>{index + 1}</td>
+                  <td style={{border: '1px solid #ddd', padding: '6px', wordBreak: 'break-word', whiteSpace: 'normal'}}>
                     <input
                         type="text"
                         value={row.getter_time}
                         onChange={(e) => handleTableChangeServices_2(index, 'getter_time', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none' }}
+                        style={{width: '100%', border: 'none', outline: 'none'}}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>
                     <input
                         type="text"
                         value={row.cargo_sender_give}
                         onChange={(e) => handleTableChangeServices_2(index, 'cargo_sender_give', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none', appearance: 'none', MozAppearance: 'textfield',WebkitAppearance: 'none' }}
+                        style={{
+                          width: '100%',
+                          border: 'none',
+                          outline: 'none',
+                          appearance: 'none',
+                          MozAppearance: 'textfield',
+                          WebkitAppearance: 'none'
+                        }}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>
                     <input
                         type="text"
                         value={row.address_give}
                         onChange={(e) => handleTableChangeServices_2(index, 'address_give', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none' }}
+                        style={{width: '100%', border: 'none', outline: 'none'}}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>
                     <input
                         type="text"
                         value={row.contact_give}
                         onChange={(e) => handleTableChangeServices_2(index, 'contact_give', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none', appearance: 'none', MozAppearance: 'textfield',WebkitAppearance: 'none' }}
+                        style={{
+                          width: '100%',
+                          border: 'none',
+                          outline: 'none',
+                          appearance: 'none',
+                          MozAppearance: 'textfield',
+                          WebkitAppearance: 'none'
+                        }}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>
                     <input
                         type="text"
                         value={row.smth_else_give}
                         onChange={(e) => handleTableChangeServices_2(index, 'smth_else_give', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none', appearance: 'none', MozAppearance: 'textfield',WebkitAppearance: 'none' }}
+                        style={{
+                          width: '100%',
+                          border: 'none',
+                          outline: 'none',
+                          appearance: 'none',
+                          MozAppearance: 'textfield',
+                          WebkitAppearance: 'none'
+                        }}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px', textAlign: 'center' }}>
-                    <div onClick={() => handleRemoveRowServices_2(index)} style={{ cursor: 'pointer' }}>✖</div>
+                  <td style={{border: '1px solid #ddd', padding: '6px', textAlign: 'center'}}>
+                    <div onClick={() => handleRemoveRowServices_2(index)} style={{cursor: 'pointer'}}>✖</div>
                   </td>
                 </tr>
             ))}
             </tbody>
           </table>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-            <div onClick={handleAddRowServices_2} style={{ cursor: 'pointer', color: 'blue' }}>Добавить запись</div>
+          <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '10px'}}>
+            <div onClick={handleAddRowServices_2} style={{cursor: 'pointer', color: 'blue'}}>Добавить запись</div>
             {services_2.length > 0 && (
-                <div onClick={handleSaveTableServices_2} style={{ cursor: 'pointer', color: 'green' }}>Сохранить</div>
+                <div onClick={handleSaveTableServices_2} style={{cursor: 'pointer', color: 'green'}}>Сохранить</div>
             )}
           </div>
         </Container>
@@ -676,81 +719,109 @@ const ClientRequestContainer = ({ type }) => {
             overflowX: 'auto'
           }}>
             <thead>
-            <tr style={{ backgroundColor: '#f2f2f2' }}>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '10px' }}>№</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '120px' }}>Название товара</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '30px' }}>Масса</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '40px' }}>Обджорм</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '50px' }}>Габариты</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '50px' }}>Места</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '50px' }}>способ разгрузки/выгрузки</th>
-              <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '20px' }}></th>
+            <tr style={{backgroundColor: '#f2f2f2'}}>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '10px'}}>№</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '120px'}}>Название товара</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '30px'}}>Масса</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '40px'}}>Обджорм</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '50px'}}>Габариты</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '50px'}}>Места</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '50px'}}>способ разгрузки/выгрузки</th>
+              <th style={{border: '1px solid #ddd', padding: '6px', minWidth: '20px'}}></th>
             </tr>
             </thead>
             <tbody>
             {services_3.map((row, index) => (
                 <tr key={index}>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>{index + 1}</td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px', wordBreak: 'break-word', whiteSpace: 'normal' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>{index + 1}</td>
+                  <td style={{border: '1px solid #ddd', padding: '6px', wordBreak: 'break-word', whiteSpace: 'normal'}}>
                     <input
                         type="text"
                         value={row.cargo_name}
                         onChange={(e) => handleTableChangeServices_3(index, 'cargo_name', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none' }}
+                        style={{width: '100%', border: 'none', outline: 'none'}}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>
                     <input
                         type="text"
                         value={row.cargo_mass}
                         onChange={(e) => handleTableChangeServices_3(index, 'cargo_mass', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none', appearance: 'none', MozAppearance: 'textfield',WebkitAppearance: 'none' }}
+                        style={{
+                          width: '100%',
+                          border: 'none',
+                          outline: 'none',
+                          appearance: 'none',
+                          MozAppearance: 'textfield',
+                          WebkitAppearance: 'none'
+                        }}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>
                     <input
                         type="text"
                         value={row.cargo_objom}
                         onChange={(e) => handleTableChangeServices_3(index, 'cargo_objom', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none' }}
+                        style={{width: '100%', border: 'none', outline: 'none'}}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>
                     <input
                         type="text"
                         value={row.cargo_gabarits}
                         onChange={(e) => handleTableChangeServices_3(index, 'cargo_gabarits', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none', appearance: 'none', MozAppearance: 'textfield',WebkitAppearance: 'none' }}
+                        style={{
+                          width: '100%',
+                          border: 'none',
+                          outline: 'none',
+                          appearance: 'none',
+                          MozAppearance: 'textfield',
+                          WebkitAppearance: 'none'
+                        }}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>
                     <input
                         type="text"
                         value={row.cargo_places}
                         onChange={(e) => handleTableChangeServices_3(index, 'cargo_places', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none', appearance: 'none', MozAppearance: 'textfield',WebkitAppearance: 'none' }}
+                        style={{
+                          width: '100%',
+                          border: 'none',
+                          outline: 'none',
+                          appearance: 'none',
+                          MozAppearance: 'textfield',
+                          WebkitAppearance: 'none'
+                        }}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px' }}>
+                  <td style={{border: '1px solid #ddd', padding: '6px'}}>
                     <input
                         type="text"
                         value={row.cargo_ways}
                         onChange={(e) => handleTableChangeServices_3(index, 'cargo_ways', e.target.value)}
-                        style={{ width: '100%', border: 'none', outline: 'none', appearance: 'none', MozAppearance: 'textfield',WebkitAppearance: 'none' }}
+                        style={{
+                          width: '100%',
+                          border: 'none',
+                          outline: 'none',
+                          appearance: 'none',
+                          MozAppearance: 'textfield',
+                          WebkitAppearance: 'none'
+                        }}
                     />
                   </td>
-                  <td style={{ border: '1px solid #ddd', padding: '6px', textAlign: 'center' }}>
-                    <div onClick={() => handleRemoveRowServices_3(index)} style={{ cursor: 'pointer' }}>✖</div>
+                  <td style={{border: '1px solid #ddd', padding: '6px', textAlign: 'center'}}>
+                    <div onClick={() => handleRemoveRowServices_3(index)} style={{cursor: 'pointer'}}>✖</div>
                   </td>
                 </tr>
             ))}
             </tbody>
           </table>
           <div style={{ marginTop: '10px' }}><b>Сумма:</b> {document.querySelector('input[name="lead[PRICE]"]').value}₽</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-            <div onClick={handleAddRowServices_3} style={{ cursor: 'pointer', color: 'blue' }}>Добавить запись</div>
+          <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '10px'}}>
+            <div onClick={handleAddRowServices_3} style={{cursor: 'pointer', color: 'blue'}}>Добавить запись</div>
             {services_3.length > 0 && (
-                <div onClick={handleSaveTableServices_3} style={{ cursor: 'pointer', color: 'green' }}>Сохранить</div>
+                <div onClick={handleSaveTableServices_3} style={{cursor: 'pointer', color: 'green'}}>Сохранить</div>
             )}
           </div>
         </Container>
@@ -758,4 +829,4 @@ const ClientRequestContainer = ({ type }) => {
   )
 };
 
-export default ClientRequestContainer;
+export default OneTimeRequestContainer;

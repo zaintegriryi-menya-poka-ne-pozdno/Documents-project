@@ -34,7 +34,6 @@ const EntityAPI = {
 
   saveEntityData: async (entityData, role) => {
 
-    console.log("entityData в api", entityData);
 
     const urlId = window.location.href;
 
@@ -49,8 +48,7 @@ const EntityAPI = {
       return;
     }
 
-    console.log(JSON.stringify({ dealId, role, entityData }));
-  
+
     const response = await fetch(config.url + `/entities/saveEntityData.php`, {
       method: 'POST',
       headers: {
@@ -60,7 +58,6 @@ const EntityAPI = {
     });
   
     const result = await response.json();
-    console.log(result);
   },
 
   fetchDataDetails: async (role) => {
@@ -106,10 +103,9 @@ const EntityAPI = {
     try {
       const response = await fetch(url, options);
       const result = await response.text();
-      console.log("result", JSON.parse(result));
       return result;
     } catch (error) {
-      console.log("error", error);
+      console.error(error)
     }
   },
 
@@ -134,7 +130,7 @@ const EntityAPI = {
       const result = await response.text();
       return result;
     } catch (error) {
-      console.log("error", error);
+      console.error("error", error);
     }
   },
 

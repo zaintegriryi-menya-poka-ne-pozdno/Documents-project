@@ -17,7 +17,6 @@ const ModalEntityEdit = ({ showModal, setShowModal, type, data, setData, setLoad
 
   useEffect(() => {
     setFormData(data);  // Инициализируем форму данными
-    console.log(data);
   }, [data]);
 
   const handleChange = (e) => {

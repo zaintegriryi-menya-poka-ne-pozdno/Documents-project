@@ -33,10 +33,8 @@ const DocsAPI = {
       userAuthor: userAuthor
     };
 
-    console.log(requestData);
 
     try {
-      console.log('Запрос:', requestData); // Вывод запроса
       const response = await fetch(config.url + `/docs_php/contract/generate_doc.php`, {
         method: 'POST',
         headers: {
@@ -69,7 +67,6 @@ const DocsAPI = {
       userAuthor: userAuthor
     };
 
-    console.log(requestData);
 
     try {
       const response = await fetch(config.url + `/docs_php/eksped/generate_doc.php`, {
@@ -104,7 +101,6 @@ const DocsAPI = {
       userAuthor: userAuthor
     };
 
-    console.log(requestData);
 
     try {
       const response = await fetch(config.url + `/docs_php/label/generate_doc.php`, {
@@ -139,7 +135,6 @@ const DocsAPI = {
       userAuthor: userAuthor
     };
 
-    console.log(requestData);
 
     try {
       const response = await fetch(config.url + `/docs_php/act/generate_doc.php`, {
@@ -174,7 +169,6 @@ const DocsAPI = {
       userAuthor: userAuthor
     };
 
-    console.log(requestData);
 
     try {
       const response = await fetch(config.url + `/docs_php/invoice/generate_doc.php`, {
@@ -209,7 +203,6 @@ const DocsAPI = {
       userAuthor: userAuthor
     };
 
-    console.log(requestData);
 
     try {
       const response = await fetch(config.url + `/docs_php/ko/generate_doc.php`, {

@@ -18,16 +18,20 @@ import {
 import CustomFields from '../CustomFields/CustomFields';
 import FilesContainer from '../FilesContainer/FilesContainer';
 import CustomButton from '../../../../components/CustomButton/CustomButton'
+import {banks} from '../banks'
 
 
 const DocsLabels = {
-  ypd: {
-    name: 'УПД',
+  dogovor: {
+    name: 'Договор',
     fields: [
+      { nameId: 'bank',  id: 1277125, typeValue: 'select',  name: 'Банк' },
+      { nameId: 'number_and_year',  id: 1277129, typeValue: 'text',  name: 'День/Год' },
+      { nameId: 'post_adress',  id: 1277127, typeValue: 'text',  name: 'Почтовый адрес' },
     ],
-    typeDocs: 'ypd',
-    createDocs: DocsAPI.createYPD,
-    files: 'ypd__list_docs'
+    typeDocs: 'dogovor',
+    createDocs: DocsAPI.createDogovor,
+    files: 'dogovor__list_docs'
   }
 };
 
@@ -42,12 +46,14 @@ const updateInputValue = (name, newValue) => {
   }
 };
 
+
 const customFields = [
   { name: 'Клиент',  entity: 'company'    },
   { name: 'Водитель',   entity: 'contact' }
 ];
 
-const YPDContainer = ({ type }) => {
+
+const DogovorContainer = ({ type }) => {
   const [allFieldsFilled, setAllFieldsFilled] = useState(false);
   const [fieldValues, setFieldValues] = useState({});
   const [dataDocs, setDataDocs] = useState(null);
@@ -62,18 +68,6 @@ const YPDContainer = ({ type }) => {
     contact: {},
     company: {},
   });
-
-  const createName = () => {
-    const way = document.querySelector('input[name="CFV[1279389]"]').value;
-    const driver = document.querySelector('input[name="CFV[1276575]"]')
-
-    const rawValueD = driver.value;
-    const parsedValueD = JSON.parse(rawValueD);
-
-    const name = `Транспортно-экспедиционные услуги, маршрут: ${way}, водитель: ${parsedValueD.name} авт.: ${parsedValueD.markaAvto}, г/н: ${parsedValueD.gosNomer}, п/п: ${parsedValueD.pp}`
-
-    return name
-  }
 
   const extractEntities = () => {
     const newEntities = {
@@ -128,7 +122,7 @@ const YPDContainer = ({ type }) => {
 
       // Проверка, является ли dataInfoDocs объектом и содержит ли свойство docs с массивом
       if (!dataInfoDocs || !Array.isArray(dataInfoDocs.docs) || dataInfoDocs.docs.length === 0) {
-        //console.error('No documents found or invalid response structure')
+        console.error('No documents found or invalid response structure')
         return
       }
 
@@ -160,7 +154,7 @@ const YPDContainer = ({ type }) => {
   }
 
   const loadDocuments = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277135]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1277131]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
       setDocuments(savedData ? JSON.parse(savedData) : []);
@@ -224,29 +218,54 @@ const YPDContainer = ({ type }) => {
   }, [fieldValues, entities]);
 
 
-  const handleGenerateYPD  = async () => {
+  const handleGenerateDogovor  = async () => {
+    const lead = document.querySelector('#lead_main_user-users_select_holder')
+    const lead_name = lead.querySelector('span').textContent
+    const managers = window.AMOCRM.constant("managers")
+    const matchedManager = Object.values(managers).find(manager => manager.title === lead_name)
+
     const lead_id = document.querySelector('#add_tags')
     const id = Number(lead_id.querySelector('span').textContent.slice(1))
 
-    const invoice = document.querySelector('input[name="CFV[1279355]"]')
+    const selected_bank = banks.find(bank => bank.name === fieldValues.bank.trim())
 
     const client = document.querySelector('input[name="CFV[1276573]"]')
+
     const rawValue = client.value;
     const parsedValue = JSON.parse(rawValue);
 
     const requestBody = {
-      doc_type: "upd",
-      filename: "УПД_разраб_для.doc",
+      doc_type: "dogovor",
+      filename: "ДОГОВОР_ВИРТЭГ_для.docx",
       amo_id: id,
-      buyer_info: parsedValue.name,
-      kpp: parsedValue.kpp,
-      inn: parsedValue.inn,
-      buyer_adress: `${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}`,
-      buyer_inn: `${parsedValue.inn}/${parsedValue.kpp}`,
-      bill_number: invoice.value,
-      tovar_name: createName(),
-      price_without_tax: document.querySelector('input[name="lead[PRICE]"]').value,
+      phone: matchedManager.phone,
+      mail: matchedManager.login,
+      bank: selected_bank.bank_adress,
+      biq: selected_bank.biq,
+      number_and_year: fieldValues.number_and_year,
+      komm_bill: selected_bank.korr_bill,
+      raschetny_bill: selected_bank.raschetny_bill,
+      customer: parsedValue.name,
+      yur_adress: `${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}`,
+      post_adress: fieldValues.post_adress,
+      customer_org_type_short: parsedValue.customer_org_type_short,
       customer_org_type: parsedValue.customer_org_type,
+      customer_job_title: parsedValue.position,
+      customer_director_name: parsedValue.contactPerson,
+      customer_phone: parsedValue.company_phone,
+      customer_email: parsedValue.emailcompani,
+      customer_emb_info: [
+        `Юридический  адрес: ${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}`,
+        `Почтовый  адрес: ${fieldValues.post_adress}`,
+        `Тел: ${parsedValue.company_phone}`,
+        `E-mail: ${parsedValue.emailcompani}`,
+        parsedValue.kpp ? `ИНН ${parsedValue.inn} КПП ${parsedValue.kpp}` : `ИНН ${parsedValue.inn}`,
+        `${parsedValue.customer_org_type_short === 'ИП' ? 'ОГРНИП ' + parsedValue.ogrnip : 'ОГРН ' + parsedValue.ogrn}`,
+        `Р/с ${parsedValue.rs}`,
+        `Банк: ${parsedValue.bank}`,
+        `К/с ${parsedValue.ks}`,
+        `БИК ${parsedValue.bic}`
+      ]
     };
 
 
@@ -284,9 +303,9 @@ const YPDContainer = ({ type }) => {
   }, [documents]);
 
   const handleUpdateDocuments = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277135]"]`)
+    const inputElement = document.querySelector(`input[name="CFV[1277131]"]`)
     if (inputElement) {
-      updateInputValue('1277135', JSON.stringify(documents || []));
+      updateInputValue('1277131', JSON.stringify(documents || []));
     }
   }
 
@@ -312,14 +331,14 @@ const YPDContainer = ({ type }) => {
         style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}
         className={DocsLabels[type].files}
       >
-        <FilesContainer dataDocs={documents} name={'УПД_разраб_для.docx'} />
+        <FilesContainer dataDocs={documents} name={'ДОГОВОР_ВИРТЭГ_для.docx'} />
       </Container>
 
       <CustomButton
-        text={isLoading ? 'Загрузка...' : 'Сгенерировать УПД'}
+        text={isLoading ? 'Загрузка...' : 'Сгенерировать договор'}
         padding={'4px'}
         color={allFieldsFilled ? 'green' : 'red'}
-        onClick={handleGenerateYPD}
+        onClick={handleGenerateDogovor}
         style={{
           width: '230px',
           margin: '15px 0 15px 0',
@@ -359,9 +378,8 @@ const YPDContainer = ({ type }) => {
           ))}
         </div>
       </Container>
-
     </Container>
   )
 };
 
-export default YPDContainer;
+export default DogovorContainer;

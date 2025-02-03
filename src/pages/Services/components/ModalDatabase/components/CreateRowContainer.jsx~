@@ -36,8 +36,10 @@ const CreateRowContainer = ({ isOpen, onClose, setServicesBase }) => {
       price: price
     };
 
+    console.log(newService);
 
     const data = await ServicesAPI.addService(newService);
+    console.log(data);
 
     clearInputs();
     setServicesBase(await ServicesAPI.fetchServicesData());

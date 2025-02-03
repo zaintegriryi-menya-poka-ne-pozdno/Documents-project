@@ -239,8 +239,6 @@ const YPDContainer = ({ type }) => {
       filename: "УПД_разраб_для.doc",
       amo_id: id,
       buyer_info: parsedValue.name,
-      kpp: parsedValue.kpp,
-      inn: parsedValue.inn,
       buyer_adress: `${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}`,
       buyer_inn: `${parsedValue.inn}/${parsedValue.kpp}`,
       bill_number: invoice.value,

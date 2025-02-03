@@ -38,7 +38,6 @@ const ServicesContainer = () => {
     const fetchStartData = async () => {
       const data = await ServicesAPI.fetchServicesToDeal();
       setServicesData(data);
-      console.log(data);
     };
     
     fetchStartData();
@@ -68,7 +67,6 @@ const ServicesContainer = () => {
       title: title,
       ...changedItems[title]
     }));
-    console.log(changedData);
     const response = await ServicesAPI.saveUpdatedServiceToDeal(changedData);
     if (response.success) {
       setServicesData(null);
@@ -81,7 +79,6 @@ const ServicesContainer = () => {
 
   
   const handleDeleteSelected = async () => {
-    console.log(selectedItems);
     const response = await ServicesAPI.deleteSelectedServicesToDeal(selectedItems);
     if (response.success) {
       setServicesData(null);
@@ -124,10 +121,6 @@ const ServicesContainer = () => {
     }
   
   }, [servicesData, changedItems]);
-
-  useEffect(() => {
-    console.log(servicesData, selectedItems, changedItems);
-  }, [servicesData, selectedItems, changedItems]);
 
   return (
     <Container className='services'>

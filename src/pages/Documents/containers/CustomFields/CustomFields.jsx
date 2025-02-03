@@ -57,8 +57,7 @@ const CustomFields = ({ id, type, name, nameId, onFieldChange }) => {
   useEffect(() => {
     const element = document.querySelector(`[data-id="${id}"]`);
 
-    // console.log(element);
-    
+
     if (element) {
       const fieldProps = getFieldProperties(element, type);
       const initialData = { fieldId: id, fieldType: type, label: name, ...fieldProps };
@@ -101,7 +100,6 @@ const CustomFields = ({ id, type, name, nameId, onFieldChange }) => {
 
   useEffect(() => {
     if (fieldData) {
-      // console.log('fieldData', fieldData);
       if (fieldData.value == '' || fieldData.value.trim() == 'Выбрать') {
         setIsFieldEmpty(true);
       } else {

@@ -125,7 +125,7 @@ const ServicesAPI = {
       const data = await response.json();
       return data;
     } catch (error) {
-      setError(error.message);
+      console.error(error.message);
     }
   },
 

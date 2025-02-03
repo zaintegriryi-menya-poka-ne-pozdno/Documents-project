@@ -276,7 +276,7 @@ const DoverennostContainer = ({ type }) => {
       korr_bill: selected_bank.korr_bill,
       raschetny_bill: selected_bank.raschetny_bill,
       document_number_data: fieldValues.document_number_data,
-      customer_org_type: parsedValue.customer_org_type,
+      customer_
       services
     };
 

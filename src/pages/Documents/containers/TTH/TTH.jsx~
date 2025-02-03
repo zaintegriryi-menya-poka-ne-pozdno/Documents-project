@@ -21,13 +21,18 @@ import CustomButton from '../../../../components/CustomButton/CustomButton'
 
 
 const DocsLabels = {
-  ypd: {
-    name: 'УПД',
+  tth: {
+    name: 'ТТН',
     fields: [
+      { nameId: 'exemp_number',id: 1277157, typeValue: 'text',      name: 'Экземпляр' },
+      { nameId: 'is_expedit',   id: 1277159, typeValue: 'select',    name: 'Является экспедитором' },
+      { nameId: 'inn_shipper',   id: 1279457, typeValue: 'text',    name: 'Грузоотправитель' },
+      { nameId: 'shipper_reqs',   id: 1279459, typeValue: 'text',    name: 'Грузополучатель' },
+      { nameId: 'cargo_price',   id: 1279463, typeValue: 'text',    name: 'Стоимость груза' },
     ],
-    typeDocs: 'ypd',
-    createDocs: DocsAPI.createYPD,
-    files: 'ypd__list_docs'
+    typeDocs: 'tth',
+    createDocs: DocsAPI.createTTH,
+    files: 'tth__list_docs'
   }
 };
 
@@ -47,7 +52,7 @@ const customFields = [
   { name: 'Водитель',   entity: 'contact' }
 ];
 
-const YPDContainer = ({ type }) => {
+const TTHContainer = ({ type }) => {
   const [allFieldsFilled, setAllFieldsFilled] = useState(false);
   const [fieldValues, setFieldValues] = useState({});
   const [dataDocs, setDataDocs] = useState(null);
@@ -62,18 +67,6 @@ const YPDContainer = ({ type }) => {
     contact: {},
     company: {},
   });
-
-  const createName = () => {
-    const way = document.querySelector('input[name="CFV[1279389]"]').value;
-    const driver = document.querySelector('input[name="CFV[1276575]"]')
-
-    const rawValueD = driver.value;
-    const parsedValueD = JSON.parse(rawValueD);
-
-    const name = `Транспортно-экспедиционные услуги, маршрут: ${way}, водитель: ${parsedValueD.name} авт.: ${parsedValueD.markaAvto}, г/н: ${parsedValueD.gosNomer}, п/п: ${parsedValueD.pp}`
-
-    return name
-  }
 
   const extractEntities = () => {
     const newEntities = {
@@ -160,7 +153,7 @@ const YPDContainer = ({ type }) => {
   }
 
   const loadDocuments = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277135]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1277137]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
       setDocuments(savedData ? JSON.parse(savedData) : []);
@@ -224,31 +217,65 @@ const YPDContainer = ({ type }) => {
   }, [fieldValues, entities]);
 
 
-  const handleGenerateYPD  = async () => {
+  const handleGenerateTTH  = async () => {
     const lead_id = document.querySelector('#add_tags')
     const id = Number(lead_id.querySelector('span').textContent.slice(1))
 
     const invoice = document.querySelector('input[name="CFV[1279355]"]')
 
+    const lead = document.querySelector('#lead_main_user-users_select_holder')
+    const lead_name = lead.querySelector('span').textContent
+    const managers = window.AMOCRM.constant("managers")
+    const matchedManager = Object.values(managers).find(manager => manager.title === lead_name)
+
+    const delivery_unload = document.querySelector('input[name="CFV[1279449]"]')
+    const date_unload = document.querySelector('input[name="CFV[1279451]"]')
+    const delivery_load = document.querySelector('input[name="CFV[1279447]"]')
+    const date_load = document.querySelector('input[name="CFV[1279453]"]')
+    const cargo_info = document.querySelector('input[name="CFV[1279461]"]')
+    const cargo_mass = document.querySelector('input[name="CFV[1262333]"]')
+    const test = document.querySelector('input[name="CFV[1279465]"]')
+    console.log(test.value)
+
     const client = document.querySelector('input[name="CFV[1276573]"]')
+
     const rawValue = client.value;
     const parsedValue = JSON.parse(rawValue);
 
-    const requestBody = {
-      doc_type: "upd",
-      filename: "УПД_разраб_для.doc",
-      amo_id: id,
-      buyer_info: parsedValue.name,
-      kpp: parsedValue.kpp,
-      inn: parsedValue.inn,
-      buyer_adress: `${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}`,
-      buyer_inn: `${parsedValue.inn}/${parsedValue.kpp}`,
-      bill_number: invoice.value,
-      tovar_name: createName(),
-      price_without_tax: document.querySelector('input[name="lead[PRICE]"]').value,
-      customer_org_type: parsedValue.customer_org_type,
-    };
+    const driver = document.querySelector('input[name="CFV[1276575]"]')
 
+    const rawValueD = driver.value;
+    const parsedValueD = JSON.parse(rawValueD);
+
+    const requestBody = {
+      doc_type: "thh",
+      filename: "ТНН_разраб_для.docx",
+      amo_id: id,
+      number: invoice.value,
+      number_nakl: invoice.value,
+      customer_reqs: `${parsedValue.customer_org_type_short} ${parsedValue.name}, ${parsedValue.inn}, ${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}, ${parsedValue.company_phone || ''}`,
+      driver_reqs: `${parsedValueD.name}`,
+      truck_info: `${parsedValueD.markaAvto} ${parsedValueD.TipTS}`,
+      truck_number: `${parsedValueD.gosNomer} ${parsedValueD.pp}`,
+      driver_signature: parsedValueD.name,
+      economic_driver_reqs: `${parsedValue.name}, ${parsedValue.inn}`,
+      economic_shipper_reqs: fieldValues.inn_shipper,
+      exemp_number: fieldValues.exemp_number,
+      is_expedit: fieldValues.is_expedit,
+      inn_shipper: fieldValues.inn_shipper,
+      shipper_reqs: fieldValues.shipper_reqs,
+      delivery_adress: delivery_unload.value,
+      cargo_info: cargo_info.value,
+      cargo_price: fieldValues.cargo_price,
+      cargo_mass: cargo_mass.value,
+      delivery_route_time: `${delivery_load.value} ${delivery_unload.value}`,
+      load_place: delivery_load.value,
+      unload_data_time: date_load.value,
+      mass_brutto: cargo_mass.value,
+      cargo_extraction: delivery_unload.value,
+      cargo_extraction_data_time: date_unload.value,
+      cargo_different_mass: cargo_mass.value
+    };
 
     setIsLoading(true);
 
@@ -284,9 +311,9 @@ const YPDContainer = ({ type }) => {
   }, [documents]);
 
   const handleUpdateDocuments = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277135]"]`)
+    const inputElement = document.querySelector(`input[name="CFV[1277137]"]`)
     if (inputElement) {
-      updateInputValue('1277135', JSON.stringify(documents || []));
+      updateInputValue('1277137', JSON.stringify(documents || []));
     }
   }
 
@@ -312,14 +339,14 @@ const YPDContainer = ({ type }) => {
         style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}
         className={DocsLabels[type].files}
       >
-        <FilesContainer dataDocs={documents} name={'УПД_разраб_для.docx'} />
+        <FilesContainer dataDocs={documents} name={'ТТН_разраб_для.docx'} />
       </Container>
 
       <CustomButton
-        text={isLoading ? 'Загрузка...' : 'Сгенерировать УПД'}
+        text={isLoading ? 'Загрузка...' : 'Сгенерировать ТТН'}
         padding={'4px'}
         color={allFieldsFilled ? 'green' : 'red'}
-        onClick={handleGenerateYPD}
+        onClick={handleGenerateTTH}
         style={{
           width: '230px',
           margin: '15px 0 15px 0',
@@ -359,9 +386,8 @@ const YPDContainer = ({ type }) => {
           ))}
         </div>
       </Container>
-
     </Container>
   )
 };
 
-export default YPDContainer;
+export default TTHContainer;

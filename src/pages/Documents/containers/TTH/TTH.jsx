@@ -26,15 +26,9 @@ const DocsLabels = {
     fields: [
       { nameId: 'exemp_number',id: 1277157, typeValue: 'text',      name: 'Экземпляр' },
       { nameId: 'is_expedit',   id: 1277159, typeValue: 'select',    name: 'Является экспедитором' },
-      { nameId: 'delivery_adress',id: 1279395, typeValue: 'text',      name: 'Адрес доставки' },
-      { nameId: 'cargo_info',id: 1277163, typeValue: 'text',      name: 'Груз' },
-      { nameId: 'cargo_mass',id: 1277165, typeValue: 'text',      name: 'Масса груза' },
-      { nameId: 'delivery_route_time',id: 1277167, typeValue: 'text',      name: 'Маршрут доставки' },
-      { nameId: 'deliver_reqs',id: 1277169, typeValue: 'text',      name: 'Перевозчик (организация инн адрес тел)' },
-      { nameId: 'load_place',id: 1277171, typeValue: 'text',      name: 'Адрес места погрузки' },
-      { nameId: 'unload_data_time',id: 1277173, typeValue: 'text',      name: 'Заявленные дата и время подачи ТТН' },
-      { nameId: 'cargo_extraction',id: 1277175, typeValue: 'text',      name: 'Адрес места выгрузки' },
-      { nameId: 'cargo_extraction_data_time',id: 1277177, typeValue: 'text',      name: 'Заявленные дата и время выгрузки ТТН' },
+      { nameId: 'inn_shipper',   id: 1279457, typeValue: 'text',    name: 'Грузоотправитель' },
+      { nameId: 'shipper_reqs',   id: 1279459, typeValue: 'text',    name: 'Грузополучатель' },
+      { nameId: 'cargo_price',   id: 1279463, typeValue: 'text',    name: 'Стоимость груза' },
     ],
     typeDocs: 'tth',
     createDocs: DocsAPI.createTTH,
@@ -121,29 +115,40 @@ const TTHContainer = ({ type }) => {
   };
 
   const fetchDataInfo = async () => {
-    const fetchInfoDocs = DocsAPI.fetchDocsInfo;
-    const dataInfoDocs = await fetchInfoDocs(DocsLabels[type].typeDocs);
-    setDataDocs(dataInfoDocs);
-    console.log('dataInfoDocs', dataInfoDocs);
+    try {
+      const fetchInfoDocs = DocsAPI.fetchDocsInfo
+      const dataInfoDocs = await fetchInfoDocs(DocsLabels[type].typeDocs)
 
-    const latestDoc = dataInfoDocs.docs.reduce((latest, current) => {
-      return current.timestamp > latest.timestamp ? current : latest;
-    }, dataInfoDocs.docs[0]);
+      // Проверка, является ли dataInfoDocs объектом и содержит ли свойство docs с массивом
+      if (!dataInfoDocs || !Array.isArray(dataInfoDocs.docs) || dataInfoDocs.docs.length === 0) {
+        //console.error('No documents found or invalid response structure')
+        return
+      }
 
-    const latestName = latestDoc ? latestDoc.name : undefined;
+      setDataDocs(dataInfoDocs)
 
-    if (latestName !== undefined) {
-      const updateInputValue = (name, newValue) => {
-        const element = document.querySelector(`[data-id="${name}"]`);
-        if (element) {
-          const input = element.querySelector('input');
-          if (input) {
-            input.value = newValue;
-            input.dispatchEvent(new Event('input', { bubbles: true }));
+      // Найти последний документ по timestamp
+      const latestDoc = dataInfoDocs.docs.reduce((latest, current) => {
+        return current.timestamp > latest.timestamp ? current : latest
+      }, dataInfoDocs.docs[0])
+
+      const latestName = latestDoc ? latestDoc.name : undefined
+
+      if (latestName !== undefined) {
+        const updateInputValue = (name, newValue) => {
+          const element = document.querySelector(`[data-id="${name}"]`)
+          if (element) {
+            const input = element.querySelector('input')
+            if (input) {
+              input.value = newValue
+              input.dispatchEvent(new Event('input', { bubbles: true }))
+            }
           }
         }
-      };
-      updateInputValue('1447475', latestName);
+        updateInputValue('1447475', latestName)
+      }
+    } catch (error) {
+      console.error('Error fetching documents:', error)
     }
   }
 
@@ -191,7 +196,6 @@ const TTHContainer = ({ type }) => {
           const element = document.querySelector('.services__total');
           if (element) {
             const number = parseInt(element.textContent.match(/\d+/)[0], 10);
-            console.log(number);
             setSummTotal(number)
             break;
           }
@@ -224,6 +228,13 @@ const TTHContainer = ({ type }) => {
     const managers = window.AMOCRM.constant("managers")
     const matchedManager = Object.values(managers).find(manager => manager.title === lead_name)
 
+    const delivery_unload = document.querySelector('input[name="CFV[1279449]"]')
+    const date_unload = document.querySelector('input[name="CFV[1279451]"]')
+    const delivery_load = document.querySelector('input[name="CFV[1279447]"]')
+    const date_load = document.querySelector('input[name="CFV[1279453]"]')
+    const cargo_info = document.querySelector('input[name="CFV[1279461]"]')
+    const cargo_mass = document.querySelector('input[name="CFV[1262333]"]')
+
     const client = document.querySelector('input[name="CFV[1276573]"]')
 
     const rawValue = client.value;
@@ -240,29 +251,29 @@ const TTHContainer = ({ type }) => {
       amo_id: id,
       number: invoice.value,
       number_nakl: invoice.value,
-      customer_reqs: `${parsedValue.name}, ${parsedValue.inn}, ${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}, ${parsedValue.company_phone}`,
-      driver_reqs: `${parsedValueD.name}, ${parsedValue.inn}`,
-      truck_info: parsedValueD.markaAvto,
-      truck_number: parsedValueD.gosNomer,
+      customer_reqs: `${parsedValue.customer_org_type_short} ${parsedValue.name}, ${parsedValue.inn}, ${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}, ${parsedValue.company_phone || ''}`,
+      driver_reqs: `${parsedValueD.name}`,
+      truck_info: `${parsedValueD.markaAvto} ${parsedValueD.TipTS}`,
+      truck_number: `${parsedValueD.gosNomer} ${parsedValueD.pp}`,
       driver_signature: parsedValueD.name,
       economic_driver_reqs: `${parsedValue.name}, ${parsedValue.inn}`,
-      economic_shipper_reqs: parsedValue.inn,
+      economic_shipper_reqs: fieldValues.inn_shipper,
       exemp_number: fieldValues.exemp_number,
       is_expedit: fieldValues.is_expedit,
-      delivery_adress: fieldValues.delivery_adress,
-      cargo_info: fieldValues.cargo_info,
-      cargo_mass: fieldValues.cargo_mass,
-      delivery_route_time: fieldValues.delivery_route_time,
-      deliver_reqs: fieldValues.deliver_reqs,
-      load_place: fieldValues.load_place,
-      unload_data_time: fieldValues.unload_data_time,
-      mass_brutto: fieldValues.cargo_mass,
-      cargo_different_mass: fieldValues.cargo_mass,
-      cargo_extraction: fieldValues.cargo_extraction,
-      cargo_extraction_data_time: fieldValues.cargo_extraction_data_time,
+      inn_shipper: fieldValues.inn_shipper,
+      shipper_reqs: fieldValues.shipper_reqs,
+      delivery_adress: delivery_unload.value,
+      cargo_info: cargo_info.value,
+      cargo_price: fieldValues.cargo_price,
+      cargo_mass: cargo_mass.value,
+      delivery_route_time: `${delivery_load.value} ${delivery_unload.value}`,
+      load_place: delivery_load.value,
+      unload_data_time: date_load.value,
+      mass_brutto: cargo_mass.value,
+      cargo_extraction: delivery_unload.value,
+      cargo_extraction_data_time: date_unload.value,
+      cargo_different_mass: cargo_mass.value
     };
-
-    console.log(JSON.stringify(requestBody, null, 2))
 
     setIsLoading(true);
 
@@ -326,11 +337,11 @@ const TTHContainer = ({ type }) => {
         style={{ padding: '5px 10px 10px 10px', borderRadius: '6px' }}
         className={DocsLabels[type].files}
       >
-        <FilesContainer dataDocs={documents} name={'ТНН_разраб_для.docx'} />
+        <FilesContainer dataDocs={documents} name={'ТТН_разраб_для.docx'} />
       </Container>
 
       <CustomButton
-        text={isLoading ? 'Загрузка...' : 'Сгенерировать ТНН'}
+        text={isLoading ? 'Загрузка...' : 'Сгенерировать ТТН'}
         padding={'4px'}
         color={allFieldsFilled ? 'green' : 'red'}
         onClick={handleGenerateTTH}

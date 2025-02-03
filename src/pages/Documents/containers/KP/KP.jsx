@@ -121,29 +121,40 @@ const KPContainer = ({ type }) => {
   };
 
   const fetchDataInfo = async () => {
-    const fetchInfoDocs = DocsAPI.fetchDocsInfo;
-    const dataInfoDocs = await fetchInfoDocs(DocsLabels[type].typeDocs);
-    setDataDocs(dataInfoDocs);
-    console.log('dataInfoDocs', dataInfoDocs);
+    try {
+      const fetchInfoDocs = DocsAPI.fetchDocsInfo
+      const dataInfoDocs = await fetchInfoDocs(DocsLabels[type].typeDocs)
 
-    const latestDoc = dataInfoDocs.docs.reduce((latest, current) => {
-      return current.timestamp > latest.timestamp ? current : latest;
-    }, dataInfoDocs.docs[0]);
+      // Проверка, является ли dataInfoDocs объектом и содержит ли свойство docs с массивом
+      if (!dataInfoDocs || !Array.isArray(dataInfoDocs.docs) || dataInfoDocs.docs.length === 0) {
+        //console.error('No documents found or invalid response structure')
+        return
+      }
 
-    const latestName = latestDoc ? latestDoc.name : undefined;
+      setDataDocs(dataInfoDocs)
 
-    if (latestName !== undefined) {
-      const updateInputValue = (name, newValue) => {
-        const element = document.querySelector(`[data-id="${name}"]`);
-        if (element) {
-          const input = element.querySelector('input');
-          if (input) {
-            input.value = newValue;
-            input.dispatchEvent(new Event('input', { bubbles: true }));
+      // Найти последний документ по timestamp
+      const latestDoc = dataInfoDocs.docs.reduce((latest, current) => {
+        return current.timestamp > latest.timestamp ? current : latest
+      }, dataInfoDocs.docs[0])
+
+      const latestName = latestDoc ? latestDoc.name : undefined
+
+      if (latestName !== undefined) {
+        const updateInputValue = (name, newValue) => {
+          const element = document.querySelector(`[data-id="${name}"]`)
+          if (element) {
+            const input = element.querySelector('input')
+            if (input) {
+              input.value = newValue
+              input.dispatchEvent(new Event('input', { bubbles: true }))
+            }
           }
         }
-      };
-      updateInputValue('1447475', latestName);
+        updateInputValue('1447475', latestName)
+      }
+    } catch (error) {
+      console.error('Error fetching documents:', error)
     }
   }
 
@@ -191,7 +202,6 @@ const KPContainer = ({ type }) => {
           const element = document.querySelector('.services__total');
           if (element) {
             const number = parseInt(element.textContent.match(/\d+/)[0], 10);
-            console.log(number);
             setSummTotal(number)
             break;
           }
@@ -242,7 +252,6 @@ const KPContainer = ({ type }) => {
       DeliverySearchTime: fieldValues.DeliverySearchTime
     };
 
-    console.log(JSON.stringify(requestBody, null, 2))
 
     setIsLoading(true);
 
