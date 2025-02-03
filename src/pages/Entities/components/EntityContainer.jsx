@@ -26,50 +26,82 @@ const entityComponents = {
 
 const FIELD_LABELS = {
   contact: {
-    phone:      'Номер телефона',
-    name:       'Имя клиента',
-    series:     'Серия',
-    number:     'Номер',
-    issueDate:  'Дата выдачи',
-    issuedBy:   'Выдал',
-    code:       'Код',
-    TipTS:      'Тип ТС',
-    markaAvto: 'Марка авто',
+    phone:          'Номер телефона',
+    name:           'Имя водителя',
+    series:         'Серия',
+    number:         'Номер',
+    issueDate:      'Дата выдачи',
+    issuedBy:       'Выдал',
+    code:           'Код',
+    TipTS:          'Тип ТС',
+    markaAvto:      'Марка авто',
     gosNomer:       'г/н',
     TipPricepa:     'п/прицеп',
     pp:             'г/н пп'
   },
   company: {
-    inn:            'ИНН',
-    name:           'Название',
-    contactPerson:  'ФИО',
-    position:       'Должность',
-    kpp:            'КПП',
-    company_phone:  'Номер телефона',
-    ogrn:           'ОГРН',
-    bic:            'БИК',
-    bank:           'Банк',
-    ks:             'к/с',
-    rs:             'р/с',
-    postalСode:    'Почтовый индекс',
-    city:          'Город',
-    street:        'Улица',
-    building:      'Дом',
-    office:        "Офис",
-    phonecompani:  "Номер телефона",
-    emailcompani:  "Электронная почта"
+    customer_org_type:        'Тип организации (полный)',
+    customer_org_type_short:  'Тип организации (короткий)',
+    inn:                      'ИНН',
+    name:                     'Название',
+    contactPerson:            'ФИО',
+    position:                 'Должность',
+    kpp:                      'КПП',
+    company_phone:            'Номер телефона',
+    ogrn:                     'ОГРН',
+    ogrnip:                   'ОГРНИП',
+    bic:                      'БИК',
+    bank:                     'Банк',
+    ks:                       'к/с',
+    rs:                       'р/с',
+    postalСode:               'Почтовый индекс',
+    city:                     'Город',
+    street:                   'Улица',
+    building:                 'Дом',
+    office:                   "Офис",
+    emailcompani:             'Электронная почта'
+  },
+  carrier: {
+    customer_org_type:       'Тип организации (полный)',
+    customer_org_type_short: 'Тип организации (короткий)',
+    carrier_inn:             'ИНН',
+    carrier_name:            'Название',
+    carrier_contactPerson:   'ФИО',
+    carrier_position:        'Должность',
+    carrier_kpp:             'КПП',
+    carrier_company_phone:   'Номер телефона',
+    carrier_ogrn:            'ОГРН',
+    carrier_ogrnip:          'ОГРНИП',
+    carrier_bic:             'БИК',
+    carrier_bank:            'Банк',
+    carrier_ks:              'к/с',
+    carrier_rs:              'р/с',
+    carrier_postalCode:      'Почтовый индекс',
+    carrier_city:            'Город',
+    carrier_street:          'Улица',
+    carrier_building:        'Дом',
+    carrier_office:          "Офис",
+    carrier_emailcompani:    "Электронная почта"
   }
 };
 
 const EntityContainer = ({ label, role, doDuplicate, setDoDuplicate, dataDuplicate, setDataDuplicate }) => {
-  const [entityType, setEntityType] = useState(role === 'recipient' ? 'contact' : 'company');
+  const [entityType, setEntityType] = useState(role === 'recipient'
+      ? 'contact'
+      : role === 'transfer'
+          ? 'carrier'
+          : 'company');
   const [entityDetails, setEntityDetails] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const targetInputName = entityType === 'contact' ? 'CFV[1276575]' : 'CFV[1276573]';
+      const targetInputName = entityType === 'contact'
+          ? 'CFV[1276575]'
+          : entityType === 'carrier'
+              ? 'CFV[1279353]'
+              : 'CFV[1276573]';
       const targetInput = document.querySelector(`input[name="${targetInputName}"]`);
       if (targetInput && targetInput.value) {
         setEntityDetails(JSON.parse(targetInput.value));
@@ -82,7 +114,11 @@ const EntityContainer = ({ label, role, doDuplicate, setDoDuplicate, dataDuplica
     fetchData();
 
     const observer = new MutationObserver(() => {
-      const targetInputName = entityType === 'contact' ? 'CFV[1276575]' : 'CFV[1276573]';
+      const targetInputName = entityType === 'contact'
+          ? 'CFV[1276575]'
+          : entityType === 'carrier'
+              ? 'CFV[1279353]'
+              : 'CFV[1276573]';
       const targetInput = document.querySelector(`input[name="${targetInputName}"]`);
       if (targetInput && targetInput.value) {
         setEntityDetails(JSON.parse(targetInput.value));
@@ -131,6 +167,11 @@ const EntityContainer = ({ label, role, doDuplicate, setDoDuplicate, dataDuplica
               <p style={{ fontSize: '16px', color: '#555' }}><strong>Название компании:</strong> {entityDetails.name || '-'}</p>
               <p style={{ fontSize: '16px', color: '#555' }}><strong>ИНН:</strong> {entityDetails.inn || '-'}</p>
             </>
+          ) : entityType === 'carrier' ? (
+              <>
+                <p style={{ fontSize: '16px', color: '#555' }}><strong>Название перевозчика:</strong> {entityDetails.carrier_name || '-'}</p>
+                <p style={{ fontSize: '16px', color: '#555' }}><strong>ИНН:</strong> {entityDetails.carrier_inn || '-'}</p>
+              </>
           ) : (
             <>
               <p style={{ fontSize: '16px', color: '#555' }}><strong>Имя:</strong> {entityDetails.name || '-'}</p>
@@ -139,11 +180,23 @@ const EntityContainer = ({ label, role, doDuplicate, setDoDuplicate, dataDuplica
           )}
           {isExpanded && (
             <div style={{ marginTop: '10px', background: '#f9f9f9', padding: '12px', borderRadius: '8px' }}>
-              {Object.keys(FIELD_LABELS[entityType]).map((key) => (
-                <p key={key} style={{ fontSize: '14px', color: '#666' }}>
+              {Object.keys(FIELD_LABELS[entityType]).map((key) => {
+                if (entityType !== 'contact') {
+                  if (entityDetails.customer_org_type_short === 'ИП') {
+                    if (key === 'carrier_kpp') return
+                    if (key === 'kpp') return
+                    if (key === 'ogrn') return
+                    if (key === 'carrier_ogrn') return
+                  }
+                  if (entityDetails.customer_org_type_short === 'ООО') {
+                    if (key === 'ogrnip') return
+                    if (key === 'carrier_ogrnip') return
+                  }
+                }
+                return (<p key={key} style={{fontSize: '14px', color: '#666'}}>
                   <strong>{FIELD_LABELS[entityType][key]}:</strong> {entityDetails[key] || '-'}
-                </p>
-              ))}
+                </p>)
+              })}
             </div>
           )}
           <CustomButton

@@ -230,24 +230,32 @@ const DogovorContainer = ({ type }) => {
       amo_id: id,
       phone: matchedManager.phone,
       mail: matchedManager.login,
-      bank_adress: selected_bank.bank_adress,
+      bank: selected_bank.bank_adress,
       biq: selected_bank.biq,
-      korr_bill: selected_bank.korr_bill,
-      raschetny_bill: selected_bank.raschetny_bill,
       number_and_year: fieldValues.number_and_year,
-      post_adress: fieldValues.post_adress,
+      komm_bill: selected_bank.korr_bill,
+      raschetny_bill: selected_bank.raschetny_bill,
       customer: parsedValue.name,
       yur_adress: `${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}`,
+      post_adress: fieldValues.post_adress,
+      customer_org_type_short: parsedValue.customer_org_type_short,
+      customer_org_type: parsedValue.customer_org_type,
+      customer_job_title: parsedValue.position,
       customer_director_name: parsedValue.contactPerson,
       customer_phone: parsedValue.company_phone,
       customer_email: parsedValue.emailcompani,
-      customer_inn: parsedValue.inn,
-      customer_kpp: parsedValue.kpp,
-      customer_ogrn: parsedValue.ogrn,
-      customer_raschetny_bill: parsedValue.rs,
-      customer_bank: parsedValue.bank,
-      customer_komm_bill: parsedValue.ks,
-      customer_biq: parsedValue.bic
+      customer_emb_info: [
+        `Юридический  адрес: ${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}`,
+        `Почтовый  адрес: ${fieldValues.post_adress}`,
+        `Тел: ${parsedValue.company_phone}`,
+        `E-mail: ${parsedValue.emailcompani}`,
+        parsedValue.kpp ? `ИНН ${parsedValue.inn} КПП ${parsedValue.kpp}` : `ИНН ${parsedValue.inn}`,
+        `${parsedValue.customer_org_type_short === 'ИП' ? 'ОГРНИП ' + parsedValue.ogrnip : 'ОГРН ' + parsedValue.ogrn}`,
+        `Р/с ${parsedValue.rs}`,
+        `Банк: ${parsedValue.bank}`,
+        `К/с ${parsedValue.ks}`,
+        `БИК ${parsedValue.bic}`
+      ]
     };
 
     console.log(JSON.stringify(requestBody, null, 2))

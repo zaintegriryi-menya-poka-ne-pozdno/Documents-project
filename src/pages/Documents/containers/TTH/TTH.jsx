@@ -26,7 +26,7 @@ const DocsLabels = {
     fields: [
       { nameId: 'exemp_number',id: 1277157, typeValue: 'text',      name: 'Экземпляр' },
       { nameId: 'is_expedit',   id: 1277159, typeValue: 'select',    name: 'Является экспедитором' },
-      { nameId: 'delivery_adress',id: 1277161, typeValue: 'text',      name: 'Адрес доставки' },
+      { nameId: 'delivery_adress',id: 1279395, typeValue: 'text',      name: 'Адрес доставки' },
       { nameId: 'cargo_info',id: 1277163, typeValue: 'text',      name: 'Груз' },
       { nameId: 'cargo_mass',id: 1277165, typeValue: 'text',      name: 'Масса груза' },
       { nameId: 'delivery_route_time',id: 1277167, typeValue: 'text',      name: 'Маршрут доставки' },
@@ -217,7 +217,7 @@ const TTHContainer = ({ type }) => {
     const lead_id = document.querySelector('#add_tags')
     const id = Number(lead_id.querySelector('span').textContent.slice(1))
 
-    const invoice = document.querySelector('#person_n').textContent
+    const invoice = document.querySelector('input[name="CFV[1279355]"]')
 
     const lead = document.querySelector('#lead_main_user-users_select_holder')
     const lead_name = lead.querySelector('span').textContent
@@ -238,8 +238,8 @@ const TTHContainer = ({ type }) => {
       doc_type: "thh",
       filename: "ТНН_разраб_для.docx",
       amo_id: id,
-      number: invoice,
-      number_nakl: invoice,
+      number: invoice.value,
+      number_nakl: invoice.value,
       customer_reqs: `${parsedValue.name}, ${parsedValue.inn}, ${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}, ${parsedValue.company_phone}`,
       driver_reqs: `${parsedValueD.name}, ${parsedValue.inn}`,
       truck_info: parsedValueD.markaAvto,

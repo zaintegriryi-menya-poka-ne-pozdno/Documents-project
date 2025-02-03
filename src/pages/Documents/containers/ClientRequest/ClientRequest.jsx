@@ -24,9 +24,6 @@ const DocsLabels = {
   clientrequest: {
     name: 'Заявка с клиентом',
     fields: [
-      { nameId: 'dogovor_date',  id: 1277055, typeValue: 'text',  name: 'Дата договора' },
-      { nameId: 'doroga',  id: 1277047, typeValue: 'text',  name: 'Дорога' },
-      { nameId: 'price',  id: 1277049, typeValue: 'text',  name: 'Цена' },
       { nameId: 'preprice',  id: 1277051, typeValue: 'text',  name: 'Предоплата' },
       { nameId: 'times_ways_to_pay',  id: 1277053, typeValue: 'text',  name: 'Сроки и условия оплаты' },
       { nameId: 'dop_info',  id: 1277059, typeValue: 'text',  name: 'Дополнительная информация' },
@@ -255,7 +252,7 @@ const ClientRequestContainer = ({ type }) => {
     const lead_id = document.querySelector('#add_tags')
     const id = Number(lead_id.querySelector('span').textContent.slice(1))
 
-    const invoice = document.querySelector('#person_n').textContent
+    const invoice = document.querySelector('input[name="CFV[1279355]"]')
 
     const client = document.querySelector('input[name="CFV[1276573]"]')
 
@@ -273,15 +270,15 @@ const ClientRequestContainer = ({ type }) => {
       amo_id: id,
       phone: matchedManager.phone,
       mail: matchedManager.login,
-      number: invoice,
-      dogovor_number: invoice,
-      dogovor_date: fieldValues.dogovor_date,
-      doroga: fieldValues.doroga,
-      price: fieldValues.price,
+      number: invoice.value,
+      dogovor_number: invoice.value,
+      dogovor_date: document.querySelector('input[name="CFV[1279393]"]').value,
+      doroga: document.querySelector('input[name="CFV[1279389]"]').value,
+      price: document.querySelector('input[name="lead[PRICE]"]').value,
       preprice: fieldValues.preprice,
       times_ways_to_pay: fieldValues.times_ways_to_pay,
       driver: parsedValueD.name,
-      driver_passport: `${parsedValueD.series} ${parsedValueD.number}`,
+      driver_passport: `${parsedValueD.issuedBy} ${parsedValueD.issueDate} ${parsedValueD.series} ${parsedValueD.number}`,
       driver_number: parsedValueD.phone,
       truck_type: parsedValueD.TipTS,
       truck: parsedValueD.markaAvto,
@@ -739,6 +736,7 @@ const ClientRequestContainer = ({ type }) => {
             ))}
             </tbody>
           </table>
+          <div style={{ marginTop: '10px' }}><b>Сумма:</b> {document.querySelector('input[name="lead[PRICE]"]').value}₽</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
             <div onClick={handleAddRowServices_3} style={{ cursor: 'pointer', color: 'blue' }}>Добавить запись</div>
             {services_3.length > 0 && (

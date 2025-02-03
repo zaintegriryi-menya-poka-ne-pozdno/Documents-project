@@ -27,6 +27,14 @@ const EntitiesContainer = () => {
         setDataDuplicate={setDataDuplicate}
       />
       <EntityContainer
+        label="Перевозчик"
+        role="transfer"
+        doDuplicate={doDuplicate}
+        setDoDuplicate={setDoDuplicate}
+        dataDuplicate={dataDuplicate}
+        setDataDuplicate={setDataDuplicate}
+      />
+      <EntityContainer
         label="Водитель"
         role="recipient"
         doDuplicate={doDuplicate}

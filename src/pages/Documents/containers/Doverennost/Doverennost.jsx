@@ -223,7 +223,7 @@ const DoverennostContainer = ({ type }) => {
     const lead_id = document.querySelector('#add_tags')
     const id = Number(lead_id.querySelector('span').textContent.slice(1))
 
-    const invoice = document.querySelector('#person_n').textContent
+    const invoice = document.querySelector('input[name="CFV[1279355]"]')
 
     const selected_bank = banks.find(bank => bank.name === fieldValues.bank.trim())
 
@@ -250,7 +250,7 @@ const DoverennostContainer = ({ type }) => {
       doc_type: "dovr",
       filename: "Довр_разраб_для.docx",
       amo_id: id,
-      number_dovr: invoice,
+      number_dovr: invoice.value,
       getter_dovr: parsedValueD.name,
       giver_dovr: parsedValue.name,
       driver: parsedValueD.name,

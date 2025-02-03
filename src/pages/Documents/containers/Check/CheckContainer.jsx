@@ -58,6 +58,7 @@ const CheckContainer = ({ type }) => {
 
   const [summTotal, setSummTotal] = useState(0);
 
+
   const [isLoading, setIsLoading] = useState(false);
 
   const [entities, setEntities] = useState({
@@ -140,12 +141,26 @@ const CheckContainer = ({ type }) => {
     }
   }
 
+  const createName = () => {
+    const way = document.querySelector('input[name="CFV[1279389]"]').value;
+    const driver = document.querySelector('input[name="CFV[1276575]"]')
+
+    const rawValueD = driver.value;
+    const parsedValueD = JSON.parse(rawValueD);
+
+    const name = `Транспортно-экспедиционные услуги, маршрут: ${way}, водитель: ${parsedValueD.name} авт.: ${parsedValueD.markaAvto}, г/н: ${parsedValueD.gosNomer}, п/п: ${parsedValueD.pp}`
+
+    return name
+  }
+
   const loadTableData = () => {
     const inputElement = document.querySelector(`input[name="CFV[1276507]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
+      const table = JSON.parse(savedData);
+      table[0].name = createName()
       if (savedData) {
-        setTableData(JSON.parse(savedData));
+        setTableData(table);
       }
     }
   };
@@ -228,7 +243,7 @@ const CheckContainer = ({ type }) => {
     const lead_id = document.querySelector('#add_tags')
     const id = Number(lead_id.querySelector('span').textContent.slice(1))
 
-    const invoice = document.querySelector('#person_n').textContent
+    const invoice = document.querySelector('input[name="CFV[1279355]"]')
 
     const selected_bank = banks.find(bank => bank.name === fieldValues.bank.trim())
 
@@ -238,7 +253,7 @@ const CheckContainer = ({ type }) => {
         accomodation: item.name,
         quantity: item.quantity,
         unit: item.unit,
-        price: item.price
+        price: document.querySelector('input[name="lead[PRICE]"]').value
       }
     })
 
@@ -253,7 +268,7 @@ const CheckContainer = ({ type }) => {
       amo_id: id,
       phone: matchedManager.phone,
       mail: matchedManager.login,
-      invoice_number: invoice,
+      invoice_number: invoice.value,
       bank_adress: selected_bank.bank_adress,
       biq: selected_bank.biq,
       korr_bill: selected_bank.korr_bill,
@@ -266,10 +281,18 @@ const CheckContainer = ({ type }) => {
       street: parsedValue.street,
       building: parsedValue.building,
       office: parsedValue.office,
+      customer_emb_info: [
+        `Юридический  адрес: ${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}`,
+        `Почтовый  адрес: ${fieldValues.post_adress}`,
+        `Тел: ${parsedValue.company_phone}`,
+        `E-mail: ${parsedValue.emailcompani}`,
+        parsedValue.kpp ? `ИНН ${parsedValue.inn} КПП ${parsedValue.kpp}` : `ИНН ${parsedValue.inn}`,
+        `${parsedValue.customer_org_type_short === 'ИП' ? 'ОГРНИП ' + parsedValue.ogrnip : 'ОГРН ' + parsedValue.ogrn}`
+      ],
       services,
     };
 
-    //console.log(JSON.stringify(requestBody, null, 2))
+    // console.log(JSON.stringify(requestBody, null, 2))
 
     setIsLoading(true);
 
@@ -426,8 +449,6 @@ const CheckContainer = ({ type }) => {
             <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '120px' }}>Наименование работ, услуг</th>
             <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '30px' }}>Кол-во</th>
             <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '40px' }}>Ед. изм.</th>
-            <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '50px' }}>Цена</th>
-            <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '50px' }}>Сумма</th>
             <th style={{ border: '1px solid #ddd', padding: '6px', minWidth: '20px' }}></th>
           </tr>
         </thead>
@@ -459,22 +480,6 @@ const CheckContainer = ({ type }) => {
                   style={{ width: '100%', border: 'none', outline: 'none' }}
                 />
               </td>
-              <td style={{ border: '1px solid #ddd', padding: '6px' }}>
-                <input
-                  type="text"
-                  value={row.price}
-                  onChange={(e) => handleTableChange(index, 'price', e.target.value)}
-                  style={{ width: '100%', border: 'none', outline: 'none', appearance: 'none', MozAppearance: 'textfield',WebkitAppearance: 'none' }}
-                />
-              </td>
-              <td style={{ border: '1px solid #ddd', padding: '6px' }}>
-                <input
-                  type="text"
-                  value={row.total}
-                  onChange={(e) => handleTableChange(index, 'total', e.target.value)}
-                  style={{ width: '100%', border: 'none', outline: 'none', appearance: 'none', MozAppearance: 'textfield',WebkitAppearance: 'none' }}
-                />
-              </td>
               <td style={{ border: '1px solid #ddd', padding: '6px', textAlign: 'center' }}>
                 <div onClick={() => handleRemoveRow(index)} style={{ cursor: 'pointer' }}>✖</div>
               </td>
@@ -482,6 +487,7 @@ const CheckContainer = ({ type }) => {
           ))}
         </tbody>
       </table>
+      <div style={{ marginTop: '10px' }}><b>Сумма:</b> {document.querySelector('input[name="lead[PRICE]"]').value}₽</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
         <div onClick={handleAddRow} style={{ cursor: 'pointer', color: 'blue' }}>Добавить запись</div>
         {tableData.length > 0 && (

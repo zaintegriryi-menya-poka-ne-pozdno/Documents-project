@@ -24,14 +24,6 @@ const DocsLabels = {
   ypd: {
     name: 'УПД',
     fields: [
-      { nameId: 'bill',   id: 1277141, typeValue: 'text',    name: 'Статус' },
-      { nameId: 'document_type',   id: 1277143, typeValue: 'text',    name: 'Тип документа' },
-      { nameId: 'valyuta',   id: 1277145, typeValue: 'text',    name: 'Валюта (наименование, код)' },
-      { nameId: 'number',   id: 1277147, typeValue: 'text',    name: '№П/П' },
-      { nameId: 'tovar_name',   id: 1277149, typeValue: 'text',    name: 'Название товара' },
-      { nameId: 'price_without_tax',   id: 1277151, typeValue: 'text',    name: 'Стоимость товара' },
-      { nameId: 'axiz',   id: 1277153, typeValue: 'text',    name: 'Акцизы' },
-      { nameId: 'percent',   id: 1277155, typeValue: 'text',    name: 'Налоговая ставка' },
     ],
     typeDocs: 'ypd',
     createDocs: DocsAPI.createYPD,
@@ -70,6 +62,18 @@ const YPDContainer = ({ type }) => {
     contact: {},
     company: {},
   });
+
+  const createName = () => {
+    const way = document.querySelector('input[name="CFV[1279389]"]').value;
+    const driver = document.querySelector('input[name="CFV[1276575]"]')
+
+    const rawValueD = driver.value;
+    const parsedValueD = JSON.parse(rawValueD);
+
+    const name = `Транспортно-экспедиционные услуги, маршрут: ${way}, водитель: ${parsedValueD.name} авт.: ${parsedValueD.markaAvto}, г/н: ${parsedValueD.gosNomer}, п/п: ${parsedValueD.pp}`
+
+    return name
+  }
 
   const extractEntities = () => {
     const newEntities = {
@@ -214,7 +218,7 @@ const YPDContainer = ({ type }) => {
     const lead_id = document.querySelector('#add_tags')
     const id = Number(lead_id.querySelector('span').textContent.slice(1))
 
-    const invoice = document.querySelector('#person_n').textContent
+    const invoice = document.querySelector('input[name="CFV[1279355]"]')
 
     const client = document.querySelector('input[name="CFV[1276573]"]')
     const rawValue = client.value;
@@ -227,15 +231,9 @@ const YPDContainer = ({ type }) => {
       buyer_info: parsedValue.name,
       buyer_adress: `${parsedValue.city} ${parsedValue.street} ${parsedValue.building} ${parsedValue.office}`,
       buyer_inn: `${parsedValue.inn}/${parsedValue.kpp}`,
-      bill_number: invoice,
-      bill: fieldValues.bill,
-      document_type: fieldValues.document_type,
-      valyuta: fieldValues.valyuta,
-      number: fieldValues.number,
-      tovar_name: fieldValues.tovar_name,
-      price_without_tax: fieldValues.price_without_tax,
-      axiz: fieldValues.axiz,
-      percent: fieldValues.percent,
+      bill_number: invoice.value,
+      tovar_name: createName(),
+      price_without_tax: document.querySelector('input[name="lead[PRICE]"]').value,
     };
 
     console.log(JSON.stringify(requestBody, null, 2))

@@ -25,9 +25,6 @@ const DocsLabels = {
   onetimerequest: {
     name: 'Заявка разовая с клиентом',
     fields: [
-      { nameId: 'dogovor_date',  id: 1277069, typeValue: 'text',  name: 'Дата договора' },
-      { nameId: 'doroga',  id: 1277071, typeValue: 'text',  name: 'Дорога' },
-      { nameId: 'price',  id: 1277073, typeValue: 'text',  name: 'Цена' },
       { nameId: 'preprice',  id: 1277075, typeValue: 'text',  name: 'Предоплата' },
       { nameId: 'times_ways_to_pay',  id: 1277077, typeValue: 'text',  name: 'Сроки и условия оплаты' },
       { nameId: 'dop_info',  id: 1277079, typeValue: 'text',  name: 'Дополнительная информация' },
@@ -149,7 +146,7 @@ const OneTimeRequestContainer = ({ type }) => {
   }
 
   const loadServices_1 = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277061]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1276961]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
       if (savedData) {
@@ -159,7 +156,7 @@ const OneTimeRequestContainer = ({ type }) => {
   };
 
   const loadServices_2 = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277063]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1277033]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
       if (savedData) {
@@ -169,7 +166,7 @@ const OneTimeRequestContainer = ({ type }) => {
   };
 
   const loadServices_3 = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277065]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1277035]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
       if (savedData) {
@@ -256,7 +253,7 @@ const OneTimeRequestContainer = ({ type }) => {
     const lead_id = document.querySelector('#add_tags')
     const id = Number(lead_id.querySelector('span').textContent.slice(1))
 
-    const invoice = document.querySelector('#person_n').textContent
+    const invoice = document.querySelector('input[name="CFV[1279355]"]')
 
     const client = document.querySelector('input[name="CFV[1276573]"]')
 
@@ -274,15 +271,15 @@ const OneTimeRequestContainer = ({ type }) => {
       amo_id: id,
       phone: matchedManager.phone,
       mail: matchedManager.login,
-      number: invoice,
-      dogovor_number: invoice,
-      dogovor_date: fieldValues.dogovor_date,
-      doroga: fieldValues.doroga,
-      price: fieldValues.price,
+      number: invoice.value,
+      dogovor_number: invoice.value,
+      dogovor_date: document.querySelector('input[name="CFV[1279393]"]').value,
+      doroga: document.querySelector('input[name="CFV[1279389]"]').value,
+      price: document.querySelector('input[name="lead[PRICE]"]').value,
       preprice: fieldValues.preprice,
       times_ways_to_pay: fieldValues.times_ways_to_pay,
       driver: parsedValueD.name,
-      driver_passport: `${parsedValueD.series} ${parsedValueD.number}`,
+      driver_passport: `${parsedValueD.issuedBy} ${parsedValueD.issueDate} ${parsedValueD.series} ${parsedValueD.number}`,
       driver_number: parsedValueD.phone,
       truck_type: parsedValueD.TipTS,
       truck: parsedValueD.markaAvto,
@@ -345,9 +342,9 @@ const OneTimeRequestContainer = ({ type }) => {
   };
 
   const handleSaveTableServices_1 = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277061]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1276961]"]`);
     if (inputElement) {
-      updateInputValue('1277061', JSON.stringify(services_1));
+      updateInputValue('1276961', JSON.stringify(services_1));
     }
   };
 
@@ -361,9 +358,9 @@ const OneTimeRequestContainer = ({ type }) => {
   };
 
   const handleSaveTableServices_2 = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277063]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1277033]"]`);
     if (inputElement) {
-      updateInputValue('1277063', JSON.stringify(services_2));
+      updateInputValue('1277033', JSON.stringify(services_2));
     }
   };
 
@@ -377,9 +374,9 @@ const OneTimeRequestContainer = ({ type }) => {
   };
 
   const handleSaveTableServices_3 = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277065]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1277035]"]`);
     if (inputElement) {
-      updateInputValue('1277065', JSON.stringify(services_3));
+      updateInputValue('1277035', JSON.stringify(services_3));
     }
   };
 
@@ -811,6 +808,7 @@ const OneTimeRequestContainer = ({ type }) => {
             ))}
             </tbody>
           </table>
+          <div style={{ marginTop: '10px' }}><b>Сумма:</b> {document.querySelector('input[name="lead[PRICE]"]').value}₽</div>
           <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '10px'}}>
             <div onClick={handleAddRowServices_3} style={{cursor: 'pointer', color: 'blue'}}>Добавить запись</div>
             {services_3.length > 0 && (

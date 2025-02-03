@@ -24,8 +24,6 @@ const DocsLabels = {
   carierrequest: {
     name: 'Заявка с перевозчиком',
     fields: [
-      { nameId: 'dogovor_date',  id: 1277095, typeValue: 'text',  name: 'Дата договора' },
-      { nameId: 'doroga',  id: 1277097, typeValue: 'text',  name: 'Дорога' },
       { nameId: 'price',  id: 1277099, typeValue: 'text',  name: 'Цена' },
       { nameId: 'preprice',  id: 1277101, typeValue: 'text',  name: 'Предоплата' },
       { nameId: 'times_ways_to_pay',  id: 1277103, typeValue: 'text',  name: 'Сроки и условия оплаты' },
@@ -49,7 +47,7 @@ const updateInputValue = (name, newValue) => {
 };
 
 const customFields = [
-  { name: 'Клиент',  entity: 'company'    },
+  { name: 'Перевозчик',  entity: 'carrier' },
   { name: 'Водитель',   entity: 'contact' }
 ];
 
@@ -67,7 +65,7 @@ const CarierRequestContainer = ({ type }) => {
 
   const [entities, setEntities] = useState({
     contact: {},
-    company: {},
+    carrier: {},
   });
 
   const [services_1, setServices_1] = useState([]);
@@ -77,7 +75,7 @@ const CarierRequestContainer = ({ type }) => {
   const extractEntities = () => {
     const newEntities = {
       contact: {},
-      company: {},
+      carrier: {},
     };
 
     document.querySelectorAll('.entity__company, .entity__contact').forEach(entity => {
@@ -148,7 +146,7 @@ const CarierRequestContainer = ({ type }) => {
   }
 
   const loadServices_1 = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277087]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1276961]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
       if (savedData) {
@@ -158,7 +156,7 @@ const CarierRequestContainer = ({ type }) => {
   };
 
   const loadServices_2 = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277089]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1277033]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
       if (savedData) {
@@ -168,7 +166,7 @@ const CarierRequestContainer = ({ type }) => {
   };
 
   const loadServices_3 = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277091]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1277035]"]`);
     if (inputElement) {
       const savedData = inputElement.value;
       if (savedData) {
@@ -247,20 +245,19 @@ const CarierRequestContainer = ({ type }) => {
 
 
   const handleGenerateClientRequest  = async () => {
-    const lead = document.querySelector('#lead_main_user-users_select_holder')
-    const lead_name = lead.querySelector('span').textContent
+    const lead_name = document.querySelector('input[name="CFV[1279357]"]').value
     const managers = window.AMOCRM.constant("managers")
     const matchedManager = Object.values(managers).find(manager => manager.title === lead_name)
 
     const lead_id = document.querySelector('#add_tags')
     const id = Number(lead_id.querySelector('span').textContent.slice(1))
 
-    const invoice = document.querySelector('#person_n').textContent
+    const invoice = document.querySelector('input[name="CFV[1279355]"]')
 
-    const client = document.querySelector('input[name="CFV[1276573]"]')
+    const perevozchik = document.querySelector('input[name="CFV[1279353]"]')
 
-    const rawValue = client.value;
-    const parsedValue = JSON.parse(rawValue);
+    const rawValueP = perevozchik.value;
+    const parsedValueP = JSON.parse(rawValueP);
 
     const driver = document.querySelector('input[name="CFV[1276575]"]')
 
@@ -273,25 +270,24 @@ const CarierRequestContainer = ({ type }) => {
       amo_id: id,
       phone: matchedManager.phone,
       mail: matchedManager.login,
-      number: invoice,
-      dogovor_number: invoice,
-      dogovor_date: fieldValues.dogovor_date,
-      doroga: fieldValues.doroga,
+      number: invoice.value,
+      dogovor_number: invoice.value,
+      dogovor_date: document.querySelector('input[name="CFV[1279393]"]').value,
+      doroga: document.querySelector('input[name="CFV[1279389]"]').value,
       price: fieldValues.price,
       preprice: fieldValues.preprice,
       times_ways_to_pay: fieldValues.times_ways_to_pay,
       driver: parsedValueD.name,
-      driver_passport: `${parsedValueD.series} ${parsedValueD.number}`,
+      driver_passport: `${parsedValueD.issuedBy} ${parsedValueD.issueDate} ${parsedValueD.series} ${parsedValueD.number}`,
       driver_number: parsedValueD.phone,
       truck_type: parsedValueD.TipTS,
       truck: parsedValueD.markaAvto,
       truck_gos_number: parsedValueD.gosNomer,
       pricep: parsedValueD.TipPricepa,
       pricep_gos_number: parsedValueD.pp,
-      customer_company: parsedValue.name,
-      customer_director_name: parsedValue.contactPerson,
-      customer_inn: parsedValue.inn,
-      customer_kpp: parsedValue.kpp,
+      customer_company: parsedValueP.carrier_name,
+      customer_director_name: parsedValueP.carrier_contactPerson,
+      customer_inn: parsedValueP.carrier_inn,
       dop_info: fieldValues.dop_info,
       services_1,
       services_2,
@@ -343,9 +339,9 @@ const CarierRequestContainer = ({ type }) => {
   };
 
   const handleSaveTableServices_1 = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277087]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1276961]"]`);
     if (inputElement) {
-      updateInputValue('1277087', JSON.stringify(services_1));
+      updateInputValue('1276961', JSON.stringify(services_1));
     }
   };
 
@@ -359,9 +355,9 @@ const CarierRequestContainer = ({ type }) => {
   };
 
   const handleSaveTableServices_2 = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277089]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1277033]"]`);
     if (inputElement) {
-      updateInputValue('1277089', JSON.stringify(services_2));
+      updateInputValue('1277033', JSON.stringify(services_2));
     }
   };
 
@@ -375,9 +371,9 @@ const CarierRequestContainer = ({ type }) => {
   };
 
   const handleSaveTableServices_3 = () => {
-    const inputElement = document.querySelector(`input[name="CFV[1277091]"]`);
+    const inputElement = document.querySelector(`input[name="CFV[1277035]"]`);
     if (inputElement) {
-      updateInputValue('1277091', JSON.stringify(services_3));
+      updateInputValue('1277035', JSON.stringify(services_3));
     }
   };
 
@@ -389,11 +385,11 @@ const CarierRequestContainer = ({ type }) => {
   }
 
   const getEntityName = (entityType) => {
-    const targetInputName = entityType === 'contact' ? 'CFV[1276575]' : 'CFV[1276573]';
+    const targetInputName = entityType === 'contact' ? 'CFV[1276575]' : 'CFV[1279353]';
     const targetInput = document.querySelector(`input[name="${targetInputName}"]`);
     if (targetInput && targetInput.value) {
       const entityData = JSON.parse(targetInput.value);
-      return entityData.name || 'данные отсутствуют';
+      return entityType === 'contact' ? entityData.name || 'данные отсутствуют' : entityData.carrier_name || 'данные отсутствуют'
     }
     return 'данные отсутствуют';
   };
